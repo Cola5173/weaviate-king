@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { Table, Empty, Tag, Collapse, Typography, Input } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Table, Empty, Tag, Collapse, Typography, Input, Button, Tooltip, Space, Modal, message } from "antd";
+import { BACKEND_BASE_URL } from "../config";
+import { SearchOutlined, ReloadOutlined, CopyOutlined, CheckOutlined, FileSearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import "./CollectionsPage.css";
 
 const { Text } = Typography;
 
 interface CollectionsPageProps {
-  connection?: { id: string; name: string; address: string } | null;
+  connection?: { id: string; name: string; address: string; scheme?: string; apiKey?: string } | null;
   schema?: any | null;
+  onRefresh?: () => void;
 }
 
 interface ClassData {
@@ -20,9 +22,14 @@ interface ClassData {
   raw: any;
 }
 
-export default function CollectionsPage({ connection, schema }: CollectionsPageProps) {
+export default function CollectionsPage({ connection, schema, onRefresh }: CollectionsPageProps) {
   const [isDark, setIsDark] = useState(true);
   const [search, setSearch] = useState("");
+  const [classModalOpen, setClassModalOpen] = useState(false);
+  const [classModalTitle, setClassModalTitle] = useState<string>("");
+  const [classModalJson, setClassModalJson] = useState<any>(null);
+  const [classModalLoading, setClassModalLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const checkTheme = () => {
@@ -79,24 +86,69 @@ export default function CollectionsPage({ connection, schema }: CollectionsPageP
       title: renderHeader("className", "类名"),
       dataIndex: "className",
       key: "className",
-      width: 250,
+      width: 400,
       align: "center",
-      ellipsis: true,
-      render: (text: string) => (
-        <Text 
-          strong 
-          ellipsis 
-          style={{ 
-            color: isDark ? "#52c41a" : "#1890ff",
-            display: "block",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis"
-          }}
-        >
-          {text}
-        </Text>
-      ),
+      ellipsis: false,
+      render: (text: string) => {
+        const handleClick = async () => {
+          if (!connection) return;
+          try {
+            setClassModalTitle(text);
+            setClassModalOpen(true);
+            setClassModalLoading(true);
+            setClassModalJson(null);
+            const payload = {
+              id: connection.id,
+              name: connection.name,
+              scheme: connection.scheme || "http",
+              address: connection.address,
+              apiKey: connection.apiKey || "",
+              className: text,
+            };
+            const resp = await fetch(`${BACKEND_BASE_URL}/schema/class`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const result = await resp.json();
+            if (!resp.ok || !result?.success) {
+              throw new Error(result?.message || `HTTP ${resp.status}`);
+            }
+            setClassModalJson(result?.data?.schema ?? result?.data ?? {});
+            message.success("查询成功");
+          } catch (e: any) {
+            message.error(e?.message || "查询失败");
+          } finally {
+            setClassModalLoading(false);
+          }
+        };
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
+            <span
+              style={{
+                color: isDark ? "#52c41a" : "#1890ff",
+                display: "block",
+                whiteSpace: "normal",
+                wordBreak: "break-all",
+              }}
+              title={text}
+            >
+              {text}
+            </span>
+            <Tooltip title="查看 class 详情">
+              <Button
+                size="small"
+                type="link"
+                icon={<FileSearchOutlined />}
+                onClick={handleClick}
+                disabled={!connection}
+              >
+                详情
+              </Button>
+            </Tooltip>
+          </div>
+        );
+      },
     },
     {
       title: renderHeader("vectorIndexType", "向量索引类型"),
@@ -168,18 +220,30 @@ export default function CollectionsPage({ connection, schema }: CollectionsPageP
             "未选择连接"
           )}
         </div>
-        <Input
-          allowClear
-          size="middle"
-          placeholder="搜索className"
-          prefix={<SearchOutlined />}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: 280 }}
-        />
+        {connection && (
+          <Space size={8}>
+            <Tooltip title="刷新列表">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => onRefresh && onRefresh()}
+              />
+            </Tooltip>
+            <Input
+              allowClear
+              size="middle"
+              placeholder="搜索className"
+              prefix={<SearchOutlined />}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ width: 280 }}
+            />
+          </Space>
+        )}
       </div>
 
-      {classes.length === 0 ? (
+      {!connection ? (
+        <Empty description="请先选择连接配置" />
+      ) : classes.length === 0 ? (
         <Empty description="没有可显示的 classes" />
       ) : (
         <>
@@ -196,6 +260,79 @@ export default function CollectionsPage({ connection, schema }: CollectionsPageP
           />
         </>
       )}
+      <Modal
+        open={classModalOpen}
+        onCancel={() => {
+          setClassModalOpen(false);
+          setCopied(false);
+        }}
+        title={
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingRight: 48 }}>
+            <span>Class Schema: {classModalTitle}</span>
+            {!classModalLoading && classModalJson && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 8 }}>
+                <Button
+                  type="text"
+                  icon={copied ? <CheckOutlined /> : <CopyOutlined />}
+                  onClick={async () => {
+                    try {
+                      const jsonString = JSON.stringify(classModalJson, null, 2);
+                      await navigator.clipboard.writeText(jsonString);
+                      setCopied(true);
+                      message.success("已复制到剪贴板");
+                      setTimeout(() => setCopied(false), 2000);
+                    } catch (e) {
+                      message.error("复制失败");
+                    }
+                  }}
+                  size="small"
+                >
+                  {copied ? "已复制" : "复制"}
+                </Button>
+              </div>
+            )}
+          </div>
+        }
+        footer={null}
+        width={900}
+        styles={{
+          body: {
+            padding: 0,
+            maxHeight: "70vh",
+            overflow: "hidden",
+          },
+        }}
+      >
+        {classModalLoading ? (
+          <div style={{ textAlign: "center", padding: 48 }}>
+            <div>加载中...</div>
+          </div>
+        ) : classModalJson ? (
+          <div
+            style={{
+              backgroundColor: isDark ? "#1e1e1e" : "#f5f5f5",
+              padding: 16,
+              maxHeight: "70vh",
+              overflow: "auto",
+            }}
+          >
+            <pre
+              style={{
+                margin: 0,
+                padding: 0,
+                fontFamily: "Monaco, Menlo, 'Ubuntu Mono', Consolas, 'source-code-pro', monospace",
+                fontSize: 13,
+                lineHeight: 1.6,
+                color: isDark ? "#d4d4d4" : "#333",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {JSON.stringify(classModalJson, null, 2)}
+            </pre>
+          </div>
+        ) : null}
+      </Modal>
     </div>
   );
 }

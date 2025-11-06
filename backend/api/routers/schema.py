@@ -4,10 +4,10 @@ from typing import Dict
 import httpx
 from fastapi import APIRouter
 from models.base import Response
-from models.connect_model import Connections
+from models.connect_model import Connections, ClassSchemaRequest
 from config.business_setting import TIMEOUT_CONFIG
 
-SCHEMA_QUERY_TIMEOUT = TIMEOUT_CONFIG["TEST_CONNECTION_TIMEOUT"]
+SCHEMA_QUERY_TIMEOUT = TIMEOUT_CONFIG["SCHEMA_QUERY_TIMEOUT"]
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/schema", tags=["schema"])
@@ -96,4 +96,60 @@ async def query_schema(request: Connections) -> Response:
             success=False,
             message=f"查询异常: {str(e)}"
         )
+
+
+@router.post("/class", response_model=Response)
+async def query_class_schema(request: ClassSchemaRequest) -> Response:
+    """根据 className 查询单个 class 的 schema 配置。
+
+    Weaviate 支持 GET /v1/schema/{className} 获取单个类配置。
+    """
+    base_url = f"{request.scheme}://{request.address}".rstrip("/")
+    class_name = request.className
+    schema_url = f"{base_url}/v1/schema/{class_name}"
+
+    logger.info(
+        "查询 class schema 开始 id=%s name=%s class=%s url=%s 超时时间=%ss",
+        request.id, request.name, class_name, schema_url, SCHEMA_QUERY_TIMEOUT,
+    )
+
+    headers: Dict[str, str] = {}
+    if request.apiKey:
+        headers["Authorization"] = f"Bearer {request.apiKey}"
+
+    try:
+        async with httpx.AsyncClient(timeout=SCHEMA_QUERY_TIMEOUT) as client:
+            try:
+                resp = await client.get(schema_url, headers=headers)
+                if resp.status_code == 200:
+                    try:
+                        class_schema = resp.json()
+                        logger.info("查询 class schema 成功 id=%s class=%s", request.id, class_name)
+                        return Response(
+                            success=True,
+                            message="查询 class schema 成功",
+                            data={
+                                "id": request.id,
+                                "name": request.name,
+                                "address": f"{request.scheme}://{request.address}",
+                                "className": class_name,
+                                "schema": class_schema,
+                            },
+                        )
+                    except Exception as e:
+                        logger.error("解析 class schema 响应失败 id=%s class=%s 错误=%s", request.id, class_name, str(e))
+                        return Response(success=False, message=f"解析响应失败: {str(e)}")
+                elif resp.status_code == 404:
+                    return Response(success=False, message="未找到该 class")
+                elif resp.status_code == 401:
+                    return Response(success=False, message="未授权，请检查 API Key")
+                else:
+                    return Response(success=False, message=f"查询失败: HTTP {resp.status_code}")
+            except httpx.TimeoutException:
+                return Response(success=False, message="查询超时，请稍后重试")
+            except httpx.ConnectError as e:
+                return Response(success=False, message=f"连接失败: {str(e)}")
+    except Exception as e:
+        logger.exception("查询 class schema 出现未预期异常 id=%s class=%s 错误=%s", request.id, class_name, str(e))
+        return Response(success=False, message=f"查询异常: {str(e)}")
 

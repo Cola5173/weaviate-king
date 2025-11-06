@@ -26,3 +26,13 @@ class Connections(BaseModel):
     scheme: str
     address: str
     apiKey: str
+
+
+class ClassSchemaRequest(BaseModel):
+    """请求某个 class 的 Schema 详情"""
+    id: str
+    name: str
+    scheme: str = Field(default="http", pattern=r"^(http|https)$")
+    address: str
+    apiKey: Optional[str] = Field(default=None)
+    className: str = Field(..., description="要查询的 class 名称")

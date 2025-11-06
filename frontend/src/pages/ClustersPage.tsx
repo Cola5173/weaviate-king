@@ -112,7 +112,9 @@ export default function ClustersPage() {
           connection: {
             id: data?.data?.id || cluster.id,
             name: data?.data?.name || cluster.name,
-            address: data?.data?.address || `${cluster.scheme || "http"}://${cluster.address}`,
+            scheme: cluster.scheme || "http",
+            address: cluster.address,
+            apiKey: cluster.apiKey || "",
           },
           schema: data?.data?.schema,
         };
