@@ -21,9 +21,6 @@ export default function AddClusterModal({
   const [loading, setLoading] = useState(false);
   const [useApiKey, setUseApiKey] = useState(false);
 
-  // 后端基础地址（从统一配置文件中读取）
-  // const BACKEND_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || "http://localhost:5175";
-
   // 解析地址，提取协议和地址部分
   useEffect(() => {
     if (editingCluster?.address) {
@@ -39,13 +36,10 @@ export default function AddClusterModal({
         host = address.replace("https://", "");
       }
       
-      // 从编辑的集群中获取 API Key 状态（这里假设有 apiKey 字段，实际需要根据数据结构调整）
-      // 暂时初始化为 false，后续可以根据实际数据结构调整
       form.setFieldsValue({
         scheme,
         address: host,
         name: editingCluster.name,
-        tls: false,
         apiKey: "",
       });
       setUseApiKey(false);
@@ -54,7 +48,6 @@ export default function AddClusterModal({
         scheme: "http",
         address: "",
         name: "",
-        tls: false,
         apiKey: "",
       });
       setUseApiKey(false);
@@ -97,17 +90,42 @@ export default function AddClusterModal({
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      // 组合协议和地址
-      const fullAddress = `${values.scheme}://${values.address}`;
-      const cluster: Cluster = {
-        id: editingCluster?.id || Date.now().toString(),
+      setLoading(true);
+
+      const payload: Record<string, any> = {
         name: values.name,
-        address: fullAddress,
+        scheme: values.scheme,
+        address: values.address,
       };
-      onSave(cluster);
-      form.resetFields();
+      if (useApiKey && values.apiKey) {
+        payload.apiKey = values.apiKey;
+      }
+
+      const resp = await fetch(`${BACKEND_BASE_URL}/connection/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await resp.json();
+      if (resp.ok && data?.success) {
+        const fullAddress = `${values.scheme}://${values.address}`;
+        const cluster: Cluster = {
+          id: editingCluster?.id || Date.now().toString(),
+          name: values.name,
+          address: fullAddress,
+        };
+        message.success(data?.message || "保存成功");
+        onSave(cluster);
+        form.resetFields();
+      } else {
+        message.error(data?.message || `保存失败 (${resp.status})`);
+      }
     } catch (error) {
-      console.error("表单验证失败:", error);
+      console.error("保存失败:", error);
+      message.error("保存失败");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,10 +149,6 @@ export default function AddClusterModal({
         initialValues={{
           name: editingCluster?.name || "",
           address: editingCluster?.address || "",
-          tls: false,
-          ssh: false,
-          sasl: false,
-          kerberos: false,
         }}
       >
         <Form.Item
@@ -168,11 +182,10 @@ export default function AddClusterModal({
           注意:必须保证本地能够访问 Weaviate 配置的地址 (特别是域名解析,即使你填的是ip,也需要在本地配置好hosts)
         </div>
 
-        <Form.Item label="使用 ApiKey" name="apiKey" valuePropName="checked">
+        <Form.Item label="使用 ApiKey" name="useApiKey" valuePropName="checked">
           <Switch
             onChange={(checked) => {
               setUseApiKey(checked);
-              form.setFieldsValue({ tls: checked });
               if (!checked) {
                 form.setFieldsValue({ apiKey: "" });
               }
