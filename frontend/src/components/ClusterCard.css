@@ -42,8 +42,9 @@
   background: transparent;
 }
 
+.cluster-card-btn.ant-btn-dangerous,
 .cluster-card-btn.ant-btn-dangerous:hover {
-  color: #ff4d4f;
+  color: #ff4d4f !important;
 }
 
 .cluster-card-body {

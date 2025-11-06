@@ -1,10 +1,10 @@
 .header {
-  height: 40px;
+  height: 56px;
   background: #2a2a2a;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 20px;
   border-bottom: 1px solid #3a3a3a;
   -webkit-app-region: drag;
   user-select: none;
@@ -13,18 +13,33 @@
 .header-left {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+.header-logo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.header-title-wrapper {
+  display: flex;
+  align-items: flex-end;
   gap: 12px;
 }
 
 .header-title {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
   color: #ffffff;
+  line-height: 1;
 }
 
 .header-subtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: #999999;
+  line-height: 1;
+  padding-bottom: 2px;
 }
 
 .header-right {
@@ -34,18 +49,12 @@
   -webkit-app-region: no-drag;
 }
 
-.header-btn {
-  color: #ffffff;
-  border: none;
+.header-status {
+  font-size: 13px;
   padding: 4px 8px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.header-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+.header-status.error {
+  color: #ff4d4f;
 }
 

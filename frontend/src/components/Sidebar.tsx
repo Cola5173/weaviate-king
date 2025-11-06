@@ -1,14 +1,13 @@
 import {
-  ClusterOutlined,
-  SearchOutlined,
-  FileTextOutlined,
-  SendOutlined,
-  MessageOutlined,
-  TeamOutlined,
-  BarChartOutlined,
+  HomeOutlined,
+  AppstoreOutlined,
+  BoxPlotOutlined,
+  ThunderboltOutlined,
+  BlockOutlined,
+  EditOutlined,
   SettingOutlined,
-  InfoCircleOutlined,
 } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import "./Sidebar.css";
 
 interface SidebarProps {
@@ -18,29 +17,51 @@ interface SidebarProps {
 
 export default function Sidebar({ activeMenu, onMenuChange }: SidebarProps) {
   const menuItems = [
-    { key: "clusters", icon: <ClusterOutlined />, label: "集群" },
-    { key: "search", icon: <SearchOutlined />, label: "搜索" },
-    { key: "documents", icon: <FileTextOutlined />, label: "文档" },
-    { key: "send", icon: <SendOutlined />, label: "发送" },
-    { key: "messages", icon: <MessageOutlined />, label: "消息" },
-    { key: "users", icon: <TeamOutlined />, label: "用户" },
-    { key: "analytics", icon: <BarChartOutlined />, label: "分析" },
+    { key: "home", icon: <HomeOutlined />, label: "主页", color: "#52c41a" },
+    { key: "collections", icon: <AppstoreOutlined />, label: "集合" },
+    { key: "objects", icon: <BoxPlotOutlined />, label: "对象" },
+    { key: "brain", icon: <ThunderboltOutlined />, label: "AI", color: "#ff4d9a" },
+    { key: "schema", icon: <BlockOutlined />, label: "Schema" },
+    { key: "query", icon: <EditOutlined />, label: "查询", color: "#52c41a" },
     { key: "settings", icon: <SettingOutlined />, label: "设置" },
-    { key: "about", icon: <InfoCircleOutlined />, label: "关于" },
   ];
 
   return (
     <div className="sidebar">
-      {menuItems.map((item) => (
-        <div
-          key={item.key}
-          className={`sidebar-item ${activeMenu === item.key ? "active" : ""}`}
-          onClick={() => onMenuChange(item.key)}
-          title={item.label}
-        >
-          {item.icon}
-        </div>
-      ))}
+      {menuItems.map((item) => {
+        const isActive = activeMenu === item.key;
+        const style: React.CSSProperties = {};
+        
+        if (isActive) {
+          // 激活状态：使用绿色背景或自定义颜色
+          style.background = item.color || "#52c41a";
+          style.color = "#ffffff";
+        } else if (item.color) {
+          // 非激活状态但有自定义颜色：保持图标原色
+          style.color = item.color;
+        }
+        
+        return (
+          <Tooltip
+            key={item.key}
+            title={item.label}
+            placement="right"
+            overlayInnerStyle={{
+              backgroundColor: "#2a2a2a",
+              color: "#ffffff",
+              border: "1px solid #3a3a3a",
+            }}
+          >
+            <div
+              className={`sidebar-item ${isActive ? "active" : ""}`}
+              onClick={() => onMenuChange(item.key)}
+              style={style}
+            >
+              {item.icon}
+            </div>
+          </Tooltip>
+        );
+      })}
     </div>
   );
 }

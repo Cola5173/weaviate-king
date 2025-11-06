@@ -27,13 +27,13 @@
 }
 
 .add-cluster-btn {
-  background: #52c41a;
-  border-color: #52c41a;
+  background: #1890ff;
+  border-color: #1890ff;
 }
 
 .add-cluster-btn:hover {
-  background: #73d13d;
-  border-color: #73d13d;
+  background: #40a9ff;
+  border-color: #40a9ff;
 }
 
 .clusters-grid {

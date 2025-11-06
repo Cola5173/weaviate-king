@@ -5,10 +5,11 @@ import ClustersPage from "../pages/ClustersPage";
 import "./Layout.css";
 
 export default function Layout() {
-  const [activeMenu, setActiveMenu] = useState("clusters");
+  const [activeMenu, setActiveMenu] = useState("home");
 
   const renderContent = () => {
     switch (activeMenu) {
+      case "home":
       case "clusters":
         return <ClustersPage />;
       default:
