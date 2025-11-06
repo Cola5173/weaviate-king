@@ -13,7 +13,7 @@ STORAGE_CONFIG = {
 SERVER_CONFIG = {
     # 应用服务器配置
     "HOST": os.getenv("WEAVIATE_KING_HOST", "0.0.0.0"),
-    "PORT": int(os.getenv("WEAVIATE_KING_PORT", "8000")),
+    "PORT": int(os.getenv("WEAVIATE_KING_PORT", "5175")),
 }
 
 # CORS 配置

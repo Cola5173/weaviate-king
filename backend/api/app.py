@@ -1,6 +1,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from api.routers import connection
 
 from config.settings import (
     SERVER_CONFIG,
@@ -16,6 +17,11 @@ if not root_logger.hasHandlers():
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     )
+
+# 降低第三方库 httpx/httpcore 的日志级别，避免冗余的请求明细日志
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 logger = logging.getLogger("weaviate_king")
 
@@ -53,6 +59,9 @@ app.add_middleware(
     CORSMiddleware,
     **CORS_CONFIG
 )
+
+# 注册路由
+app.include_router(connection.router)
 
 
 @app.on_event("startup")

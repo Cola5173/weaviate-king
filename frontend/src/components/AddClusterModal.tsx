@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal, Form, Input, Select, Switch, Button, message } from "antd";
 import { Cluster } from "../pages/ClustersPage";
 import "./AddClusterModal.css";
+import { BACKEND_BASE_URL } from "../config";
 
 interface AddClusterModalProps {
   open: boolean;
@@ -19,6 +20,9 @@ export default function AddClusterModal({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [useApiKey, setUseApiKey] = useState(false);
+
+  // 后端基础地址（从统一配置文件中读取）
+  // const BACKEND_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || "http://localhost:5175";
 
   // 解析地址，提取协议和地址部分
   useEffect(() => {
@@ -59,14 +63,30 @@ export default function AddClusterModal({
 
   const handleTestConnection = async () => {
     try {
-      const values = await form.validateFields(["scheme", "address"]);
+      const values = await form.validateFields(["name", "scheme", "address", useApiKey ? "apiKey" : undefined].filter(Boolean) as string[]);
       setLoading(true);
       // 组合协议和地址进行测试
-      const fullAddress = `${values.scheme}://${values.address}`;
-      // TODO: 实现连接测试逻辑，使用 fullAddress
-      console.log("测试连接:", fullAddress);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      message.success("连接测试成功");
+      const payload: Record<string, any> = {
+        name: values.name,
+        scheme: values.scheme,
+        address: values.address,
+      };
+      if (useApiKey && values.apiKey) {
+        payload.apiKey = values.apiKey;
+      }
+
+      const resp = await fetch(`${BACKEND_BASE_URL}/connection/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await resp.json();
+      if (resp.ok && data?.success) {
+        message.success(data?.message || "连接测试成功");
+      } else {
+        message.error(data?.message || `连接测试失败 (${resp.status})`);
+      }
     } catch (error) {
       message.error("连接测试失败");
     } finally {
@@ -148,7 +168,7 @@ export default function AddClusterModal({
           注意:必须保证本地能够访问 Weaviate 配置的地址 (特别是域名解析,即使你填的是ip,也需要在本地配置好hosts)
         </div>
 
-        <Form.Item label="使用 ApiKey" name="tls" valuePropName="checked">
+        <Form.Item label="使用 ApiKey" name="apiKey" valuePropName="checked">
           <Switch
             onChange={(checked) => {
               setUseApiKey(checked);
