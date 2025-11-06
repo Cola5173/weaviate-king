@@ -42,7 +42,7 @@ export default function ClusterCard({
       </div>
       <div className="cluster-card-body">
         <div className="cluster-card-address">
-          <span className="address-label">address:</span>
+          <span className="address-label">地址:</span>
           <span className="address-value">{cluster.address}</span>
         </div>
       </div>

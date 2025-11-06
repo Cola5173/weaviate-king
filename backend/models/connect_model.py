@@ -8,3 +8,12 @@ class TestConnectionRequest(BaseModel):
     scheme: str = Field(default="http", pattern=r"^(http|https)$")
     address: str = Field(..., description="host:port 或 带路径的主机")
     apiKey: Optional[str] = Field(default=None, description="可选的 API Key")
+
+
+class Connections(BaseModel):
+    """"""
+    id: str
+    name: str
+    scheme: str
+    address: str
+    apiKey: str

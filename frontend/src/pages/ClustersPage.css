@@ -26,6 +26,14 @@
   color: #999999;
 }
 
+/* Light theme */
+body[data-theme='light'] .clusters-title {
+  color: #1f1f1f;
+}
+body[data-theme='light'] .clusters-count {
+  color: #595959;
+}
+
 .add-cluster-btn {
   background: #1890ff;
   border-color: #1890ff;

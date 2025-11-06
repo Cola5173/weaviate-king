@@ -1,4 +1,6 @@
 import logging
+import uuid
+from datetime import datetime, timezone
 import os
 import json
 from typing import Dict, List
@@ -6,7 +8,7 @@ from typing import Dict, List
 import httpx
 from fastapi import APIRouter
 from models.base import Response
-from models.connect_model import TestConnectionRequest
+from models.connect_model import TestConnectionRequest, Connections
 from config.business_setting import TIMEOUT_CONFIG
 from config.settings import DATA_CONFIG
 from utils.connection_utils import test_connection
@@ -15,6 +17,103 @@ CONNECTION_TEST_TIMEOUT = TIMEOUT_CONFIG["TEST_CONNECTION_TIMEOUT"]
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/connection", tags=["connection"])
+
+
+def generate_numeric_id() -> str:
+    """生成仅包含数字的 ID。
+
+    规则：毫秒时间戳 + 4 位随机数，长度约 17-19 位，避免碰撞。
+    """
+    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    rand_suffix = str(uuid.uuid4().int % 10000).zfill(4)
+    return f"{now_ms}{rand_suffix}"
+
+
+@router.delete("/delete/{conn_id}", response_model=Response)
+async def delete_connection(conn_id: str) -> Response:
+    """根据 id 删除已保存的连接配置。
+
+    从 `DATA_CONFIG['clusters_file']` 读取 JSON 数组，移除 `id == conn_id` 的项后写回。
+    若文件不存在或未找到对应项，则返回失败消息。
+    """
+    file_path = DATA_CONFIG["clusters_file"]
+    if not os.path.exists(file_path):
+        return Response(success=False, message="无可删除的数据")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                data: List[Dict] = json.load(f) or []
+            except json.JSONDecodeError:
+                data = []
+
+        before = len(data)
+        data = [item for item in data if not (isinstance(item, dict) and item.get("id") == conn_id)]
+        after = len(data)
+
+        if before == after:
+            logger.warning("删除失败 未找到指定id id=%s", conn_id)
+            return Response(success=False, message="删除失败：未找到指定记录")
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        logger.info("已删除连接配置 id=%s 剩余=%d", conn_id, after)
+        return Response(success=True, message="删除成功")
+    except Exception as e:
+        logger.exception("删除连接配置失败 错误=%s", str(e))
+        return Response(success=False, message=f"删除失败: {str(e)}")
+
+
+@router.get("/list", response_model=List[Connections])
+async def list_connections() -> List[Connections]:
+    """查询已保存的连接配置列表。
+
+    从 `DATA_CONFIG['clusters_file']` 读取 JSON 数组，并返回为 `Connections` 列表。
+    若文件不存在或内容为空，返回空列表。
+    """
+    file_path = DATA_CONFIG["clusters_file"]
+    if not os.path.exists(file_path):
+        return []
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                raw = json.load(f) or []
+            except json.JSONDecodeError:
+                raw = []
+
+        # 按 updatedAt 倒序排序（新更新的在前）
+        try:
+            raw = sorted(
+                [item for item in raw if isinstance(item, dict)],
+                key=lambda x: x.get("updatedAt", ""),
+                reverse=True,
+            )
+        except Exception:
+            # 排序失败则保持原顺序
+            pass
+
+        results: List[Connections] = []
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            try:
+                results.append(Connections(
+                    id=item.get("id", ""),
+                    name=item.get("name", ""),
+                    scheme=item.get("scheme", "http"),
+                    address=item.get("address", ""),
+                    apiKey=item.get("apiKey", ""),
+                ))
+            except Exception:
+                # 跳过无法解析的项
+                continue
+
+        return results
+    except Exception as e:
+        logger.exception("读取连接配置列表失败 错误=%s", str(e))
+        return []
 
 
 @router.post("/test", response_model=Response)
@@ -72,11 +171,44 @@ async def save(
         request.name, request.scheme, request.address, request.apiKey or "<none>", file_path,
     )
 
+    # 读取现有列表（用于 upsert 以及继承 id/createdAt）
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                data: List[Dict] = json.load(f) or []
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    # 查找是否已存在同名记录
+    existing_idx = -1
+    existing_item: Dict = {}
+    for idx, item in enumerate(data):
+        if isinstance(item, dict) and item.get("name") == request.name:
+            existing_idx = idx
+            existing_item = item
+            break
+
+    # 如果存在，优先沿用其 id；若 id 非纯数字则生成新的数字 ID；否则新建数字 ID
+    if existing_idx >= 0:
+        old_id = str(existing_item.get("id", ""))
+        record_id = old_id if old_id.isdigit() and old_id else generate_numeric_id()
+    else:
+        record_id = generate_numeric_id()
+    created_at = existing_item.get("createdAt") if existing_idx >= 0 else now_iso
+    updated_at = now_iso
+
     record = {
+        "id": record_id,
         "name": request.name,
         "scheme": request.scheme,
         "address": request.address,
         "apiKey": request.apiKey or "",
+        "createdAt": created_at,
+        "updatedAt": updated_at,
     }
 
     try:
@@ -85,29 +217,16 @@ async def save(
             save_headers: Dict[str, str] = {}
             if request.apiKey:
                 save_headers["Authorization"] = f"Bearer {request.apiKey}"
-            ok, _, msg = await test_connection(client, f"{request.scheme}://{request.address}", save_headers, CONNECTION_TEST_TIMEOUT)
+            ok, _, msg = await test_connection(client, f"{request.scheme}://{request.address}", save_headers,
+                                               CONNECTION_TEST_TIMEOUT)
             if not ok:
                 logger.error("保存前连接测试未通过 name=%s 地址=%s 错误=%s", request.name, request.address, msg)
                 return Response(success=False, message=f"保存失败: {msg}")
 
-        # 读取现有列表
-        if os.path.exists(file_path):
-            with open(file_path, "r", encoding="utf-8") as f:
-                try:
-                    data: List[Dict] = json.load(f) or []
-                except json.JSONDecodeError:
-                    data = []
-        else:
-            data = []
-
         # upsert by name
-        updated = False
-        for idx, item in enumerate(data):
-            if isinstance(item, dict) and item.get("name") == request.name:
-                data[idx] = record
-                updated = True
-                break
-        if not updated:
+        if existing_idx >= 0:
+            data[existing_idx] = record
+        else:
             data.append(record)
 
         with open(file_path, "w", encoding="utf-8") as f:

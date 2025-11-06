@@ -1,27 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { message } from "antd";
 import { Button } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import ClusterCard from "../components/ClusterCard";
 import AddClusterModal from "../components/AddClusterModal";
+import { BACKEND_BASE_URL } from "../config";
 import "./ClustersPage.css";
 
 export interface Cluster {
   id: string;
   name: string;
-  address: string;
+  address: string; // 不含协议，仅 host:port 或路径
+  scheme?: string; // 保存时需要
 }
 
-const mockClusters: Cluster[] = [
-  { id: "1", name: "172.31.186.217", address: "172.31.186.217:9092" },
-  { id: "2", name: "172.30.92.239", address: "172.30.92.239:9092" },
-  { id: "3", name: "运营商", address: "172.30.92.75:9092,172.30.92.70:9092,172.30.92.71:9092" },
-  { id: "4", name: "172.31.129.130", address: "172.31.129.130:9092" },
-];
+// 后端返回 Connections 列表，前端转换为 Cluster 用于展示
 
 export default function ClustersPage() {
-  const [clusters, setClusters] = useState<Cluster[]>(mockClusters);
+  const [clusters, setClusters] = useState<Cluster[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCluster, setEditingCluster] = useState<Cluster | null>(null);
+
+  const loadClusters = async () => {
+    try {
+      const resp = await fetch(`${BACKEND_BASE_URL}/connection/list`);
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+      const data = await resp.json();
+      // data: List[Connections] -> {name, scheme, address, apiKey}
+      const mapped: Cluster[] = (Array.isArray(data) ? data : []).map((c) => ({
+        id: c.id || c.name || `${c.scheme}://${c.address}`,
+        name: c.name,
+        address: c.address, // 仅展示 host:port，不显示协议
+        scheme: c.scheme,
+      }));
+      setClusters(mapped);
+    } catch (e) {
+      message.error("加载集群列表失败");
+    }
+  };
+
+  useEffect(() => {
+    loadClusters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAdd = () => {
     setEditingCluster(null);
@@ -33,20 +56,26 @@ export default function ClustersPage() {
     setModalOpen(true);
   };
 
-  const handleDelete = (clusterId: string) => {
-    setClusters(clusters.filter((c) => c.id !== clusterId));
+  const handleDelete = async (clusterId: string) => {
+    try {
+      const resp = await fetch(`${BACKEND_BASE_URL}/connection/delete/${encodeURIComponent(clusterId)}`, {
+        method: "DELETE",
+      });
+      const result = await resp.json();
+      if (!resp.ok || !result?.success) {
+        throw new Error(result?.message || `HTTP ${resp.status}`);
+      }
+      // 删除成功，更新本地列表
+      setClusters((prev) => prev.filter((c) => c.id !== clusterId));
+      message.success("删除成功");
+    } catch (e: any) {
+      message.error(`删除失败：${e?.message || "未知错误"}`);
+    }
   };
 
-  const handleSave = (cluster: Cluster) => {
-    if (editingCluster) {
-      // 编辑模式
-      setClusters(
-        clusters.map((c) => (c.id === cluster.id ? cluster : c))
-      );
-    } else {
-      // 添加模式
-      setClusters([...clusters, cluster]);
-    }
+  const handleSave = async (_cluster: Cluster) => {
+    // 保存由后端完成，这里刷新列表
+    await loadClusters();
     setModalOpen(false);
     setEditingCluster(null);
   };

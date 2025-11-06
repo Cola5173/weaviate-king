@@ -9,6 +9,18 @@
   border-right: 1px solid #3a3a3a;
 }
 
+/* Light theme */
+body[data-theme='light'] .sidebar {
+  background: #ffffff;
+  border-right-color: #e8e8e8;
+}
+body[data-theme='light'] .sidebar-item {
+  color: #1f1f1f;
+}
+body[data-theme='light'] .sidebar-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
 .sidebar-item {
   width: 40px;
   height: 40px;

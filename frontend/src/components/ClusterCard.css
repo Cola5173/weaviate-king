@@ -66,3 +66,19 @@
   color: #ffffff;
 }
 
+/* Light theme */
+body[data-theme='light'] .cluster-card {
+  background: #ffffff;
+  border-color: #e8e8e8;
+}
+body[data-theme='light'] .cluster-card-title {
+  color: #1f1f1f;
+}
+body[data-theme='light'] .cluster-card-address,
+body[data-theme='light'] .address-label {
+  color: #595959;
+}
+body[data-theme='light'] .address-value {
+  color: #262626;
+}
+

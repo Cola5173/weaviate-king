@@ -21,21 +21,23 @@ export default function AddClusterModal({
   const [loading, setLoading] = useState(false);
   const [useApiKey, setUseApiKey] = useState(false);
 
-  // 解析地址，提取协议和地址部分
+  // 解析地址，提取协议和地址部分（若提供了 scheme 字段则优先使用）
   useEffect(() => {
     if (editingCluster?.address) {
       const address = editingCluster.address;
-      let scheme = "http";
+      let scheme = editingCluster.scheme || "http";
       let host = address;
-      
-      if (address.startsWith("http://")) {
-        scheme = "http";
-        host = address.replace("http://", "");
-      } else if (address.startsWith("https://")) {
-        scheme = "https";
-        host = address.replace("https://", "");
+
+      if (!editingCluster.scheme) {
+        if (address.startsWith("http://")) {
+          scheme = "http";
+          host = address.replace("http://", "");
+        } else if (address.startsWith("https://")) {
+          scheme = "https";
+          host = address.replace("https://", "");
+        }
       }
-      
+
       form.setFieldsValue({
         scheme,
         address: host,

@@ -10,6 +10,18 @@
   user-select: none;
 }
 
+/* Light theme */
+body[data-theme='light'] .header {
+  background: #ffffff;
+  border-bottom-color: #e8e8e8;
+}
+body[data-theme='light'] .header-title {
+  color: #1f1f1f;
+}
+body[data-theme='light'] .header-subtitle {
+  color: #666666;
+}
+
 .header-left {
   display: flex;
   align-items: center;
