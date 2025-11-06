@@ -8,7 +8,7 @@ from typing import Dict, List
 import httpx
 from fastapi import APIRouter
 from models.base import Response
-from models.connect_model import TestConnectionRequest, Connections
+from models.connect_model import TestConnectionRequest, Connections, UpdateConnectionRequest
 from config.business_setting import TIMEOUT_CONFIG
 from config.settings import DATA_CONFIG
 from utils.connection_utils import test_connection
@@ -28,6 +28,34 @@ def generate_numeric_id() -> str:
     rand_suffix = str(uuid.uuid4().int % 10000).zfill(4)
     return f"{now_ms}{rand_suffix}"
 
+
+@router.get("/get/{conn_id}", response_model=Response)
+async def get_connection(conn_id: str) -> Response:
+    """根据 id 查询连接配置详情。
+
+    从 `DATA_CONFIG['clusters_file']` 读取 JSON 数组，返回 `id == conn_id` 的项。
+    若文件不存在或未找到对应项，返回失败消息。
+    """
+    file_path = DATA_CONFIG["clusters_file"]
+    if not os.path.exists(file_path):
+        return Response(success=False, message="未找到：数据文件不存在")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                data: List[Dict] = json.load(f) or []
+            except json.JSONDecodeError:
+                data = []
+
+        for item in data:
+            if isinstance(item, dict) and str(item.get("id", "")) == str(conn_id):
+                return Response(success=True, message="查询成功", data=item)
+
+        logger.info("查询失败 未找到指定id id=%s", conn_id)
+        return Response(success=False, message="查询失败：未找到指定记录")
+    except Exception as e:
+        logger.exception("读取连接配置详情失败 错误=%s", str(e))
+        return Response(success=False, message=f"查询失败: {str(e)}")
 
 @router.delete("/delete/{conn_id}", response_model=Response)
 async def delete_connection(conn_id: str) -> Response:
@@ -166,11 +194,6 @@ async def save(
     file_path = DATA_CONFIG["clusters_file"]
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    logger.info(
-        "保存连接配置 name=%s scheme=%s address=%s apiKey=%s -> %s",
-        request.name, request.scheme, request.address, request.apiKey or "<none>", file_path,
-    )
-
     # 读取现有列表（用于 upsert 以及继承 id/createdAt）
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
@@ -212,7 +235,7 @@ async def save(
     }
 
     try:
-        # 可选：保存前再次进行连接测试
+        # 保存前再次进行连接测试
         async with httpx.AsyncClient(timeout=CONNECTION_TEST_TIMEOUT) as client:
             save_headers: Dict[str, str] = {}
             if request.apiKey:
@@ -222,6 +245,11 @@ async def save(
             if not ok:
                 logger.error("保存前连接测试未通过 name=%s 地址=%s 错误=%s", request.name, request.address, msg)
                 return Response(success=False, message=f"保存失败: {msg}")
+
+        logger.info(
+            "保存连接配置 name=%s scheme=%s address=%s apiKey=%s -> %s",
+            request.name, request.scheme, request.address, request.apiKey or "<none>", file_path,
+        )
 
         # upsert by name
         if existing_idx >= 0:
@@ -236,3 +264,72 @@ async def save(
     except Exception as e:
         logger.exception("保存连接配置失败 错误=%s", str(e))
         return Response(success=False, message=f"保存失败: {str(e)}")
+
+
+@router.post("/update", response_model=Response)
+async def update_connection(request: UpdateConnectionRequest) -> Response:
+    """编辑并更新已存在的连接配置。
+
+    根据 `id` 查找并更新对应记录；更新前会进行连接测试验证。
+    成功后写回 `DATA_CONFIG['clusters_file']`。
+    """
+    file_path = DATA_CONFIG["clusters_file"]
+    if not os.path.exists(file_path):
+        return Response(success=False, message="更新失败：数据文件不存在")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                data: List[Dict] = json.load(f) or []
+            except json.JSONDecodeError:
+                data = []
+
+        # 定位待更新记录
+        existing_idx = -1
+        existing_item: Dict = {}
+        for idx, item in enumerate(data):
+            if isinstance(item, dict) and str(item.get("id", "")) == str(request.id):
+                existing_idx = idx
+                existing_item = item
+                break
+
+        if existing_idx < 0:
+            logger.warning("更新失败 未找到指定id id=%s", request.id)
+            return Response(success=False, message="更新失败：未找到指定记录")
+
+        # 更新前进行连接测试
+        headers: Dict[str, str] = {}
+        if request.apiKey:
+            headers["Authorization"] = f"Bearer {request.apiKey}"
+
+        base_url = f"{request.scheme}://{request.address}".rstrip("/")
+        try:
+            async with httpx.AsyncClient(timeout=CONNECTION_TEST_TIMEOUT) as client:
+                ok, _, msg = await test_connection(client, base_url, headers, CONNECTION_TEST_TIMEOUT)
+                if not ok:
+                    logger.error("更新前连接测试未通过 id=%s 错误=%s", request.id, msg)
+                    return Response(success=False, message=f"更新失败: {msg}")
+        except Exception as e:
+            logger.exception("更新连接配置测试异常 错误=%s", str(e))
+            return Response(success=False, message=f"更新失败: {str(e)}")
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        updated_record = {
+            "id": str(existing_item.get("id", request.id)),
+            "name": request.name,
+            "scheme": request.scheme,
+            "address": request.address,
+            "apiKey": request.apiKey or "",
+            "createdAt": existing_item.get("createdAt") or now_iso,
+            "updatedAt": now_iso,
+        }
+
+        data[existing_idx] = updated_record
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        return Response(success=True, message="更新成功", data=updated_record)
+    except Exception as e:
+        logger.exception("更新连接配置失败 错误=%s", str(e))
+        return Response(success=False, message=f"更新失败: {str(e)}")

@@ -82,3 +82,15 @@ body[data-theme='light'] .address-value {
   color: #262626;
 }
 
+/* Light theme action buttons */
+body[data-theme='light'] .cluster-card-btn {
+  color: #262626;
+}
+body[data-theme='light'] .cluster-card-btn:hover {
+  color: #52c41a;
+}
+body[data-theme='light'] .cluster-card-btn.ant-btn-dangerous,
+body[data-theme='light'] .cluster-card-btn.ant-btn-dangerous:hover {
+  color: #ff4d4f !important;
+}
+

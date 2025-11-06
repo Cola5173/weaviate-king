@@ -183,6 +183,16 @@ body[data-theme='light'] .add-cluster-modal .ant-input-password {
   color: #1f1f1f;
 }
 
+body[data-theme='light'] .add-cluster-modal .ant-input-password .ant-input {
+  background: transparent;
+  border: none;
+  color: #1f1f1f;
+}
+
+body[data-theme='light'] .add-cluster-modal .ant-input-password-icon {
+  color: #1f1f1f;
+}
+
 body[data-theme='light'] .add-cluster-modal .ant-input::placeholder {
   color: #8c8c8c;
 }
@@ -195,6 +205,10 @@ body[data-theme='light'] .add-cluster-modal .ant-select-selector {
 
 body[data-theme='light'] .add-cluster-modal .ant-select-selection-item {
   color: #1f1f1f !important;
+}
+
+body[data-theme='light'] .add-cluster-modal .ant-select-selection-placeholder {
+  color: #8c8c8c !important;
 }
 
 body[data-theme='light'] .add-cluster-modal .ant-select-arrow {
@@ -217,6 +231,17 @@ body[data-theme='light'] .add-cluster-modal .ant-select-item:hover {
 
 body[data-theme='light'] .add-cluster-modal .ant-switch {
   background: #d9d9d9;
+}
+body[data-theme='light'] .add-cluster-modal .ant-switch .ant-switch-handle::before {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+body[data-theme='light'] .add-cluster-modal .ant-switch-checked {
+  background: #52c41a;
+}
+body[data-theme='light'] .add-cluster-modal .ant-switch-checked .ant-switch-handle::before {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 body[data-theme='light'] .modal-footer {

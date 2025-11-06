@@ -12,6 +12,7 @@ export interface Cluster {
   name: string;
   address: string; // 不含协议，仅 host:port 或路径
   scheme?: string; // 保存时需要
+  apiKey?: string; // 编辑时展示
 }
 
 // 后端返回 Connections 列表，前端转换为 Cluster 用于展示
@@ -51,9 +52,26 @@ export default function ClustersPage() {
     setModalOpen(true);
   };
 
-  const handleEdit = (cluster: Cluster) => {
-    setEditingCluster(cluster);
-    setModalOpen(true);
+  const handleEdit = async (cluster: Cluster) => {
+    try {
+      const resp = await fetch(`${BACKEND_BASE_URL}/connection/get/${encodeURIComponent(cluster.id)}`);
+      const result = await resp.json();
+      if (!resp.ok || !result?.success) {
+        throw new Error(result?.message || `HTTP ${resp.status}`);
+      }
+      const data = result.data || {};
+      const editing: Cluster = {
+        id: String(data.id ?? cluster.id),
+        name: String(data.name ?? cluster.name),
+        scheme: String(data.scheme ?? cluster.scheme ?? "http"),
+        address: String(data.address ?? cluster.address),
+        apiKey: data.apiKey || "",
+      };
+      setEditingCluster(editing);
+      setModalOpen(true);
+    } catch (e: any) {
+      message.error(`加载连接详情失败：${e?.message || "未知错误"}`);
+    }
   };
 
   const handleDelete = async (clusterId: string) => {

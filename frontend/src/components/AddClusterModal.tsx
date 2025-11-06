@@ -42,15 +42,17 @@ export default function AddClusterModal({
         scheme,
         address: host,
         name: editingCluster.name,
-        apiKey: "",
+        apiKey: editingCluster.apiKey || "",
+        useApiKey: !!editingCluster.apiKey,
       });
-      setUseApiKey(false);
+      setUseApiKey(!!editingCluster.apiKey);
     } else {
       form.setFieldsValue({
         scheme: "http",
         address: "",
         name: "",
         apiKey: "",
+        useApiKey: false,
       });
       setUseApiKey(false);
     }
@@ -103,7 +105,14 @@ export default function AddClusterModal({
         payload.apiKey = values.apiKey;
       }
 
-      const resp = await fetch(`${BACKEND_BASE_URL}/connection/save`, {
+      const isEditing = !!editingCluster?.id;
+      let url = `${BACKEND_BASE_URL}/connection/save`;
+      if (isEditing) {
+        url = `${BACKEND_BASE_URL}/connection/update`;
+        payload.id = editingCluster!.id;
+      }
+
+      const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -116,6 +125,8 @@ export default function AddClusterModal({
           id: editingCluster?.id || Date.now().toString(),
           name: values.name,
           address: fullAddress,
+          scheme: values.scheme,
+          apiKey: useApiKey ? values.apiKey : "",
         };
         message.success(data?.message || "保存成功");
         onSave(cluster);
