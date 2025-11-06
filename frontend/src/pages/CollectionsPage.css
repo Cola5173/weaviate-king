@@ -1,0 +1,169 @@
+.collections-page {
+  padding: 16px;
+  min-height: 100%;
+}
+
+.collections-header {
+  margin-bottom: 16px;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+/* Dark theme (default) */
+.collections-page.dark {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.collections-page.dark .collections-header {
+  color: #888;
+}
+
+/* Light theme */
+.collections-page.light {
+  background: #ffffff;
+  color: #1f1f1f;
+}
+
+.collections-page.light .collections-header {
+  color: #666;
+}
+
+/* Table styles for dark theme */
+.collections-page.dark :global(.ant-table) {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-table-thead > tr > th) {
+  background: #2a2a2a;
+  color: #ffffff;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.collections-page.dark :global(.ant-table-tbody > tr > td) {
+  background: #1e1e1e;
+  color: #ffffff;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.collections-page.dark :global(.ant-table-tbody > tr:hover > td) {
+  background: #2a2a2a;
+}
+
+.collections-page.dark :global(.ant-table-tbody > tr.ant-table-row-selected > td) {
+  background: #2a2a2a;
+}
+
+.collections-page.dark :global(.ant-pagination) {
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-pagination-item) {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+.collections-page.dark :global(.ant-pagination-item a) {
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-pagination-item-active) {
+  background: #52c41a;
+  border-color: #52c41a;
+}
+
+.collections-page.dark :global(.ant-pagination-item-active a) {
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-pagination-prev),
+.collections-page.dark :global(.ant-pagination-next) {
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-pagination-prev:hover),
+.collections-page.dark :global(.ant-pagination-next:hover) {
+  color: #52c41a;
+}
+
+.collections-page.dark :global(.ant-pagination-options) {
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-select-selector) {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+  color: #ffffff;
+}
+
+.collections-page.dark :global(.ant-select-arrow) {
+  color: #ffffff;
+}
+
+/* Collapse styles for dark theme */
+.collections-page.dark :global(.ant-collapse) {
+  background: transparent;
+  border: none;
+}
+
+.collections-page.dark :global(.ant-collapse-item) {
+  border: none;
+}
+
+.collections-page.dark :global(.ant-collapse-header) {
+  color: #ffffff;
+  padding: 4px 0;
+}
+
+.collections-page.dark :global(.ant-collapse-content) {
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  margin-top: 4px;
+  padding: 8px;
+}
+
+.collections-page.dark :global(.ant-collapse-content pre) {
+  background: #1e1e1e;
+  color: #52c41a;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #3a3a3a;
+}
+
+/* Table styles for light theme */
+.collections-page.light :global(.ant-table) {
+  background: #ffffff;
+  color: #1f1f1f;
+}
+
+.collections-page.light :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  color: #1f1f1f;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.collections-page.light :global(.ant-table-tbody > tr > td) {
+  background: #ffffff;
+  color: #1f1f1f;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.collections-page.light :global(.ant-table-tbody > tr:hover > td) {
+  background: #f5f5f5;
+}
+
+.collections-page.light :global(.ant-collapse-content) {
+  background: #fafafa;
+  color: #1f1f1f;
+  border: 1px solid #e8e8e8;
+}
+
+.collections-page.light :global(.ant-collapse-content pre) {
+  background: #ffffff;
+  color: #1890ff;
+  border: 1px solid #e8e8e8;
+}
+

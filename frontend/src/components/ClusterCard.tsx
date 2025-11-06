@@ -7,7 +7,7 @@ interface ClusterCardProps {
   cluster: Cluster;
   onEdit: (cluster: Cluster) => void;
   onDelete: (clusterId: string) => void;
-  onConnect: (cluster: Cluster) => void;
+  onConnect?: (cluster: Cluster) => void;
 }
 
 export default function ClusterCard({
@@ -17,7 +17,17 @@ export default function ClusterCard({
   onConnect,
 }: ClusterCardProps) {
   return (
-    <div className="cluster-card" onClick={() => onConnect(cluster)}>
+    <div
+      className="cluster-card"
+      onClick={() => onConnect && onConnect(cluster)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          onConnect && onConnect(cluster);
+        }
+      }}
+    >
       <div className="cluster-card-header">
         <div className="cluster-card-title">{cluster.name}</div>
         <div className="cluster-card-actions">

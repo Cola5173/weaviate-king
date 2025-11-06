@@ -92,6 +92,39 @@ export default function ClustersPage() {
     }
   };
 
+  const handleConnect = async (cluster: Cluster) => {
+    try {
+      const payload: Record<string, any> = {
+        id: cluster.id,
+        name: cluster.name,
+        scheme: cluster.scheme || "http",
+        address: cluster.address,
+        apiKey: cluster.apiKey || "",
+      };
+      const resp = await fetch(`${BACKEND_BASE_URL}/schema/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await resp.json();
+      if (resp.ok && data?.success) {
+        const detail = {
+          connection: {
+            id: data?.data?.id || cluster.id,
+            name: data?.data?.name || cluster.name,
+            address: data?.data?.address || `${cluster.scheme || "http"}://${cluster.address}`,
+          },
+          schema: data?.data?.schema,
+        };
+        window.dispatchEvent(new CustomEvent("navigate:collections", { detail }));
+      } else {
+        message.error(data?.message || `连接/查询失败 (${resp.status})`);
+      }
+    } catch (e: any) {
+      message.error(`连接/查询失败：${e?.message || "未知错误"}`);
+    }
+  };
+
   const handleSave = async (_cluster: Cluster) => {
     // 保存由后端完成，这里刷新列表
     await loadClusters();
@@ -102,30 +135,6 @@ export default function ClustersPage() {
   const handleCancel = () => {
     setModalOpen(false);
     setEditingCluster(null);
-  };
-
-  const handleConnect = async (cluster: Cluster) => {
-    const payload = {
-      id: String(cluster.id),
-      name: String(cluster.name),
-      scheme: String(cluster.scheme || "http"),
-      address: String(cluster.address),
-      apiKey: cluster.apiKey || "",
-    };
-    try {
-      const resp = await fetch(`${BACKEND_BASE_URL}/connection/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const result = await resp.json();
-      if (!resp.ok || !result?.success) {
-        throw new Error(result?.message || `HTTP ${resp.status}`);
-      }
-      message.success("连接成功");
-    } catch (e: any) {
-      message.error(`连接失败：${e?.message || "未知错误"}`);
-    }
   };
 
   return (

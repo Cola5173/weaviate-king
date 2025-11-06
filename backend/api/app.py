@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import connection
+from api.routers import connection, schema
 
 from config.settings import (
     SERVER_CONFIG,
@@ -62,6 +62,7 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(connection.router)
+app.include_router(schema.router)
 
 
 @app.on_event("startup")
