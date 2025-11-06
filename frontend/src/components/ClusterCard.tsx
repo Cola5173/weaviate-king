@@ -1,0 +1,52 @@
+import { Button } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Cluster } from "../pages/ClustersPage";
+import "./ClusterCard.css";
+
+interface ClusterCardProps {
+  cluster: Cluster;
+  onEdit: (cluster: Cluster) => void;
+  onDelete: (clusterId: string) => void;
+}
+
+export default function ClusterCard({
+  cluster,
+  onEdit,
+  onDelete,
+}: ClusterCardProps) {
+  return (
+    <div className="cluster-card">
+      <div className="cluster-card-header">
+        <div className="cluster-card-title">{cluster.name}</div>
+        <div className="cluster-card-actions">
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(cluster)}
+            className="cluster-card-btn"
+          >
+            编辑
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => onDelete(cluster.id)}
+            className="cluster-card-btn"
+          >
+            删除
+          </Button>
+        </div>
+      </div>
+      <div className="cluster-card-body">
+        <div className="cluster-card-address">
+          <span className="address-label">address:</span>
+          <span className="address-value">{cluster.address}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+

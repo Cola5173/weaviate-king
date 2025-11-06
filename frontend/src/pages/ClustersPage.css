@@ -1,0 +1,44 @@
+.clusters-page {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.clusters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.clusters-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.clusters-count {
+  font-size: 14px;
+  font-weight: normal;
+  color: #999999;
+}
+
+.add-cluster-btn {
+  background: #52c41a;
+  border-color: #52c41a;
+}
+
+.add-cluster-btn:hover {
+  background: #73d13d;
+  border-color: #73d13d;
+}
+
+.clusters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+

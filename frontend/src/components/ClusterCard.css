@@ -1,0 +1,67 @@
+.cluster-card {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #3a3a3a;
+  transition: all 0.2s;
+}
+
+.cluster-card:hover {
+  border-color: #52c41a;
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.2);
+}
+
+.cluster-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cluster-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.cluster-card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.cluster-card-btn {
+  color: #ffffff;
+  border: none;
+  padding: 0;
+  height: auto;
+  font-size: 12px;
+}
+
+.cluster-card-btn:hover {
+  color: #52c41a;
+  background: transparent;
+}
+
+.cluster-card-btn.ant-btn-dangerous:hover {
+  color: #ff4d4f;
+}
+
+.cluster-card-body {
+  margin-top: 8px;
+}
+
+.cluster-card-address {
+  font-size: 13px;
+  color: #999999;
+  line-height: 1.5;
+}
+
+.address-label {
+  color: #999999;
+  margin-right: 4px;
+}
+
+.address-value {
+  color: #ffffff;
+}
+
