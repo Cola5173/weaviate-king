@@ -4,6 +4,7 @@
   padding: 16px;
   border: 1px solid #3a3a3a;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .cluster-card:hover {

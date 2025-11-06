@@ -35,6 +35,7 @@ export default function ClustersPage() {
         name: c.name,
         address: c.address, // 仅展示 host:port，不显示协议
         scheme: c.scheme,
+        apiKey: c.apiKey || "",
       }));
       setClusters(mapped);
     } catch (e) {
@@ -103,6 +104,30 @@ export default function ClustersPage() {
     setEditingCluster(null);
   };
 
+  const handleConnect = async (cluster: Cluster) => {
+    const payload = {
+      id: String(cluster.id),
+      name: String(cluster.name),
+      scheme: String(cluster.scheme || "http"),
+      address: String(cluster.address),
+      apiKey: cluster.apiKey || "",
+    };
+    try {
+      const resp = await fetch(`${BACKEND_BASE_URL}/connection/connect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await resp.json();
+      if (!resp.ok || !result?.success) {
+        throw new Error(result?.message || `HTTP ${resp.status}`);
+      }
+      message.success("连接成功");
+    } catch (e: any) {
+      message.error(`连接失败：${e?.message || "未知错误"}`);
+    }
+  };
+
   return (
     <div className="clusters-page">
       <div className="clusters-header">
@@ -126,6 +151,7 @@ export default function ClustersPage() {
             cluster={cluster}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onConnect={handleConnect}
           />
         ))}
       </div>

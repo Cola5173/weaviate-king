@@ -182,6 +182,40 @@ async def test(
     return Response(success=False, message="连接失败: 服务未就绪或无权访问 schema")
 
 
+@router.post("/connect", response_model=Response)
+async def connect(request: Connections) -> Response:
+    """根据传入的连接配置尝试建立连接并返回探测结果。
+
+    入参为 `Connections`（id、name、scheme、address、apiKey）。
+    逻辑与测试接口一致：依次检查就绪、meta、schema。
+    """
+    base_url = f"{request.scheme}://{request.address}".rstrip("/")
+
+    logger.info(
+        "连接请求开始 id=%s name=%s url=%s 超时时间=%ss",
+        request.id, request.name, base_url, CONNECTION_TEST_TIMEOUT,
+    )
+
+    headers: Dict[str, str] = {}
+    if request.apiKey:
+        headers["Authorization"] = f"Bearer {request.apiKey}"
+
+    try:
+        async with httpx.AsyncClient(timeout=CONNECTION_TEST_TIMEOUT) as client:
+            ok, result, msg = await test_connection(client, base_url, headers, CONNECTION_TEST_TIMEOUT)
+            if ok:
+                return Response(success=True, message=msg, data={
+                    "id": request.id,
+                    "name": request.name,
+                    "address": f"{request.scheme}://{request.address}",
+                    **result,
+                })
+            return Response(success=False, message=msg)
+    except Exception as e:
+        logger.exception("连接请求出现未预期异常 错误=%s", str(e))
+        return Response(success=False, message=f"连接异常: {str(e)}")
+
+
 @router.post("/save", response_model=Response)
 async def save(
         request: TestConnectionRequest
