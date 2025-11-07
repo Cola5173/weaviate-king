@@ -90,7 +90,7 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
       align: "center",
       ellipsis: false,
       render: (text: string) => {
-        const handleClick = async () => {
+        const handleViewDetails = async () => {
           if (!connection) return;
           try {
             setClassModalTitle(text);
@@ -122,6 +122,31 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
             setClassModalLoading(false);
           }
         };
+
+        const handleViewObjects = async () => {
+          if (!connection) return;
+          try {
+            // 触发跳转到对象页面
+            window.dispatchEvent(
+              new CustomEvent("navigate:objects", {
+                detail: {
+                  connection: {
+                    id: connection.id,
+                    name: connection.name,
+                    scheme: connection.scheme || "http",
+                    address: connection.address,
+                    apiKey: connection.apiKey || "",
+                  },
+                  className: text,
+                },
+              })
+            );
+            message.success(`正在跳转到 ${text} 对象列表...`);
+          } catch (e: any) {
+            message.error(e?.message || "跳转失败");
+          }
+        };
+
         return (
           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
             <span
@@ -130,8 +155,10 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
                 display: "block",
                 whiteSpace: "normal",
                 wordBreak: "break-all",
+                cursor: "pointer",
               }}
               title={text}
+              onClick={handleViewObjects}
             >
               {text}
             </span>
@@ -140,7 +167,7 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
                 size="small"
                 type="link"
                 icon={<FileSearchOutlined />}
-                onClick={handleClick}
+                onClick={handleViewDetails}
                 disabled={!connection}
               >
                 详情

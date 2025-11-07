@@ -4,6 +4,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import ClustersPage from "../pages/ClustersPage";
 import CollectionsPage from "../pages/CollectionsPage";
+import ObjectsPage from "../pages/ObjectsPage";
 import "./Layout.css";
 
 export default function Layout() {
@@ -16,6 +17,14 @@ export default function Layout() {
     address: string;
     apiKey?: string;
   } | null>(null);
+  const [objectsConnection, setObjectsConnection] = useState<{
+    id: string;
+    name: string;
+    scheme?: string;
+    address: string;
+    apiKey?: string;
+  } | null>(null);
+  const [objectsClassName, setObjectsClassName] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -26,6 +35,17 @@ export default function Layout() {
     };
     window.addEventListener("navigate:collections", handler as EventListener);
     return () => window.removeEventListener("navigate:collections", handler as EventListener);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail || {};
+      setObjectsConnection(detail.connection || null);
+      setObjectsClassName(detail.className || null);
+      setActiveMenu("objects");
+    };
+    window.addEventListener("navigate:objects", handler as EventListener);
+    return () => window.removeEventListener("navigate:objects", handler as EventListener);
   }, []);
 
   const handleRefreshCollections = async () => {
@@ -64,6 +84,16 @@ export default function Layout() {
             connection={collectionsConnection}
             schema={collectionsSchema}
             onRefresh={handleRefreshCollections}
+          />
+        );
+      case "objects":
+        return (
+          <ObjectsPage
+            connection={objectsConnection}
+            className={objectsClassName}
+            onRefresh={() => {
+              // 可以在这里添加刷新逻辑
+            }}
           />
         );
       default:

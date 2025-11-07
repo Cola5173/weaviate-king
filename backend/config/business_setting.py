@@ -7,4 +7,6 @@ TIMEOUT_CONFIG = {
     "TEST_CONNECTION_TIMEOUT": float(os.getenv("CONNECTION_TEST_TIMEOUT", "30.0")),
     # Schema 查询 HTTP 客户端超时时间（秒）
     "SCHEMA_QUERY_TIMEOUT": float(os.getenv("SCHEMA_QUERY_TIMEOUT", "30.0")),
+    # Objects 查询 HTTP 客户端超时时间（秒）
+    "OBJECTS_QUERY_TIMEOUT": float(os.getenv("OBJECTS_QUERY_TIMEOUT", "30.0")),
 }
