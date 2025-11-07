@@ -1,7 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { Table, Empty, Tag, Typography, Input, Button, Tooltip, Space, Modal, message, Spin, Select, Collapse, Tree } from "antd";
+import { Table, Empty, Tag, Typography, Input, Button, Tooltip, Space, Modal, message, Spin, Select, Collapse, Tree, Dropdown } from "antd";
 import { BACKEND_BASE_URL } from "../config";
-import { ReloadOutlined, CopyOutlined, CheckOutlined, EyeOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  ReloadOutlined,
+  CopyOutlined,
+  CheckOutlined,
+  EyeOutlined,
+  SearchOutlined,
+  DownOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  FilterOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { DataNode } from "antd/es/tree";
 import "./ObjectsPage.css";
@@ -26,19 +37,20 @@ interface ObjectData {
 
 export default function ObjectsPage({ connection, className, onRefresh }: ObjectsPageProps) {
   const [isDark, setIsDark] = useState(true);
-  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [objects, setObjects] = useState<any[]>([]);
   const [classProperties, setClassProperties] = useState<string[]>([]);
   const [filters, setFilters] = useState<Array<{ id: string; property?: string; operator: "Equal" | "Like"; value?: string }>>([
     { id: `${Date.now()}`, operator: "Equal" },
   ]);
+  const [filterLogic, setFilterLogic] = useState<"And" | "Or">("And");
   const [objectModalOpen, setObjectModalOpen] = useState(false);
   const [objectModalJson, setObjectModalJson] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [after, setAfter] = useState<string | null>(null);
   const lastFetchKeyRef = useRef<string | null>(null);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   useEffect(() => {
     const checkTheme = () => {
@@ -55,6 +67,7 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
 
     setLoading(true);
     try {
+      const effectiveCursor = typeof cursor === "undefined" ? after : cursor;
       const payload: any = {
         id: connection.id,
         name: connection.name,
@@ -72,6 +85,7 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
       let resp: Response;
       if (validFilters.length > 0) {
         payload.filters = validFilters;
+        payload.logic = filterLogic;
         resp = await fetch(`${BACKEND_BASE_URL}/objects/search`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -79,7 +93,7 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
         });
       } else {
         // 没有条件则走 REST 初始列表查询
-        payload.after = cursor || null;
+        payload.after = effectiveCursor || null;
         resp = await fetch(`${BACKEND_BASE_URL}/objects/query`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -153,6 +167,9 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
 
   useEffect(() => {
     if (!connection || !className) return;
+    setFilters([{ id: `${Date.now()}`, operator: "Equal" }]);
+    setFilterLogic("And");
+    setFilterModalOpen(false);
     // 拉取 class 的属性列表用于下拉框，并进行一次初始 REST 查询渲染表格
     (async () => {
       try {
@@ -199,13 +216,21 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
           const objs = initJson?.data?.result?.objects || [];
           setObjects(objs);
           setPagination(prev => ({ ...prev, total: objs.length }));
+          if (objs.length > 0 && objs.length === 100) {
+            const lastObj = objs[objs.length - 1];
+            setAfter(lastObj?.id ?? null);
+          } else {
+            setAfter(null);
+          }
         } else {
           setObjects([]);
           setPagination(prev => ({ ...prev, total: 0 }));
+          setAfter(null);
         }
       } catch (_) {
         setObjects([]);
         setPagination(prev => ({ ...prev, total: 0 }));
+        setAfter(null);
       } finally {
         setLoading(false);
       }
@@ -221,6 +246,16 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
     if (onRefresh) {
       onRefresh();
     }
+  };
+
+  const handleClearFilters = () => {
+    setFilters([{ id: `${Date.now()}`, operator: "Equal" }]);
+    setFilterLogic("And");
+  };
+
+  const handleApplyFilters = () => {
+    fetchObjects();
+    setFilterModalOpen(false);
   };
 
   const handleViewObject = (record: ObjectData) => {
@@ -260,15 +295,6 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
     lastUpdateTimeUnix: obj.lastUpdateTimeUnix,
     raw: obj,
   }));
-
-  const filteredTableData = tableData.filter((item) => {
-    const searchLower = search.trim().toLowerCase();
-    if (!searchLower) return true;
-    return (
-      item.id.toLowerCase().includes(searchLower) ||
-      JSON.stringify(item.properties).toLowerCase().includes(searchLower)
-    );
-  });
 
   const buildJsonTreeNodes = (value: any, keyLabel: string, path: string): DataNode => {
     const isObject = value !== null && typeof value === "object";
@@ -407,81 +433,143 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
             )}
           </div>
           {connection && className && (
-            <Tooltip title="刷新列表">
-              <Button icon={<ReloadOutlined />} onClick={handleRefresh} />
-            </Tooltip>
+            <Space>
+              <Tooltip title="刷新列表">
+                <Button icon={<ReloadOutlined />} onClick={handleRefresh} />
+              </Tooltip>
+              <Tooltip title="条件查询">
+                <Button type="primary" icon={<FilterOutlined />} onClick={() => setFilterModalOpen(true)}>
+                  条件查询
+                </Button>
+              </Tooltip>
+            </Space>
           )}
         </div>
-        {connection && className && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 8,
-              width: "100%",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                flex: 1,
-                minWidth: 0,
-              }}
-            >
-              {filters.map((f, idx) => (
-                <div key={f.id} style={{ display: "flex", gap: 8, alignItems: "center", whiteSpace: "nowrap" }}>
-                  <Select
-                    placeholder="选择属性"
-                    value={f.property}
-                    onChange={(v) => setFilters(prev => prev.map(x => x.id === f.id ? { ...x, property: v } : x))}
-                    style={{ width: 200 }}
-                    options={classProperties.map(p => ({ label: p, value: p }))}
-                  />
-                  <Select
-                    value={f.operator}
-                    onChange={(v) => setFilters(prev => prev.map(x => x.id === f.id ? { ...x, operator: v as any } : x))}
-                    style={{ width: 100 }}
-                    options={[
-                      { label: "等于", value: "Equal" },
-                      { label: "Like", value: "Like" },
-                    ]}
-                  />
-                  <Input
-                    placeholder="输入值"
-                    value={f.value}
-                    onChange={(e) => setFilters(prev => prev.map(x => x.id === f.id ? { ...x, value: e.target.value } : x))}
-                    style={{ width: 220 }}
-                  />
-                  <Button
-                    onClick={() => setFilters(prev => prev.filter(x => x.id !== f.id))}
-                    disabled={filters.length <= 1}
-                  >
-                    删除
-                  </Button>
-                  {idx === filters.length - 1 && (
-                    <Button
-                      type="dashed"
-                      onClick={() => setFilters(prev => [...prev, { id: `${Date.now()}`, operator: "Equal" }])}
-                    >
-                      添加条件
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", paddingTop: 0 }}>
-              <Button type="primary" icon={<SearchOutlined />} onClick={() => fetchObjects()} loading={loading}>
-                查询
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
+
+      <Modal
+        open={filterModalOpen && !!connection && !!className}
+        title="条件查询"
+        onCancel={() => setFilterModalOpen(false)}
+        destroyOnClose={false}
+        footer={[
+          <Button
+            key="clear"
+            onClick={handleClearFilters}
+            disabled={filters.length === 1 && !filters[0].property && !filters[0].value}
+          >
+            清空条件
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            icon={<SearchOutlined />}
+            loading={loading}
+            onClick={handleApplyFilters}
+          >
+            查询
+          </Button>,
+        ]}
+      >
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          {filters.length > 1 && (
+            <Dropdown
+              menu={{
+                selectable: true,
+                defaultSelectedKeys: [filterLogic],
+                selectedKeys: [filterLogic],
+                items: [
+                  { key: "And", label: "AND" },
+                  { key: "Or", label: "OR" },
+                ],
+                onClick: ({ key }) => setFilterLogic(key === "Or" ? "Or" : "And"),
+              }}
+              trigger={["click"]}
+            >
+              <Button
+                type="text"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4,
+                  width: 60,
+                  minWidth: 60,
+                  height: "100%",
+                  fontWeight: 600,
+                  color: isDark ? "#91caff" : "#1677ff",
+                  backgroundColor: isDark ? "#1f1f1f" : "#f4f7ff",
+                  border: `1px solid ${isDark ? "#303030" : "#dbe8ff"}`,
+                  borderRadius: 10,
+                  padding: "12px 8px",
+                }}
+              >
+                <SyncOutlined />
+                <span>{filterLogic.toUpperCase()}</span>
+                <DownOutlined />
+              </Button>
+            </Dropdown>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+            {filters.map((f) => (
+              <div
+                key={f.id}
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  backgroundColor: isDark ? "#1f1f1f" : "#f7f9fc",
+                  border: `1px solid ${isDark ? "#2f2f2f" : "#e1e8f6"}`,
+                  padding: 12,
+                  borderRadius: 10,
+                }}
+              >
+                <Select
+                  placeholder="选择属性"
+                  value={f.property}
+                  onChange={(v) => setFilters((prev) => prev.map((x) => (x.id === f.id ? { ...x, property: v } : x)))}
+                  style={{ width: 200 }}
+                  options={classProperties.map((p) => ({ label: p, value: p }))}
+                />
+                <Select
+                  value={f.operator}
+                  onChange={(v) => setFilters((prev) => prev.map((x) => (x.id === f.id ? { ...x, operator: v as any } : x)))}
+                  style={{ width: 120 }}
+                  options={[
+                    { label: "等于", value: "Equal" },
+                    { label: "Like", value: "Like" },
+                  ]}
+                />
+                <Input
+                  placeholder="输入值"
+                  value={f.value}
+                  onChange={(e) =>
+                    setFilters((prev) => prev.map((x) => (x.id === f.id ? { ...x, value: e.target.value } : x)))
+                  }
+                  style={{ flex: 1, minWidth: 220 }}
+                />
+                <Tooltip title="删除此条件">
+                  <Button
+                    icon={<DeleteOutlined />}
+                    onClick={() => setFilters((prev) => prev.filter((x) => x.id !== f.id))}
+                    disabled={filters.length <= 1}
+                  />
+                </Tooltip>
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              icon={<PlusOutlined />}
+              onClick={() => setFilters((prev) => [...prev, { id: `${Date.now()}`, operator: "Equal" }])}
+              style={{ alignSelf: "flex-start" }}
+            >
+              添加条件
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {!connection || !className ? (
         <Empty description="请先选择连接和类名" />
@@ -490,7 +578,7 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
           <Spin spinning={loading}>
             <Table
               columns={columns}
-              dataSource={filteredTableData}
+              dataSource={tableData}
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,

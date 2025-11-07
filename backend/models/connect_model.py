@@ -65,5 +65,6 @@ class ClassObjectsSearchRequest(BaseModel):
     address: str
     apiKey: Optional[str] = Field(default=None)
     className: str = Field(...)
-    filters: Optional[list[ObjectFilter]] = Field(default=None, description="过滤条件数组，按 AND 合并")
+    filters: Optional[list[ObjectFilter]] = Field(default=None, description="过滤条件数组")
+    logic: str = Field(default="And", description="过滤条件之间的逻辑关系: And | Or")
     limit: Optional[int] = Field(default=100, ge=1, le=1000)

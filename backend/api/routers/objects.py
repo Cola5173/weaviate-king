@@ -122,7 +122,13 @@ def _to_graphql_operand_literal(f: ObjectFilter) -> str:
     return f"{{ path: {path_literal} operator: Equal valueString: {value_literal} }}"
 
 
-def _build_graphql_where(filters: list[ObjectFilter]) -> str | None:
+def _normalize_logic(value: str | None) -> str:
+    if isinstance(value, str) and value.strip().lower() == "or":
+        return "Or"
+    return "And"
+
+
+def _build_graphql_where(filters: list[ObjectFilter], logic: str | None = "And") -> str | None:
     if not filters:
         return None
     operands = [_to_graphql_operand_literal(f) for f in filters]
@@ -131,7 +137,8 @@ def _build_graphql_where(filters: list[ObjectFilter]) -> str | None:
         return None
     if len(operands) == 1:
         return operands[0]
-    return "{ operator: And operands: [" + ", ".join(operands) + "] }"
+    operator = _normalize_logic(logic)
+    return "{ operator: " + operator + " operands: [" + ", ".join(operands) + "] }"
 
 
 @router.post("/search", response_model=Response)
@@ -143,11 +150,6 @@ async def search_objects(request: ClassObjectsSearchRequest) -> Response:
     headers: Dict[str, str] = {"Content-Type": "application/json"}
     if request.apiKey:
         headers["Authorization"] = f"Bearer {request.apiKey}"
-
-    where = None
-    if request.filters:
-        operands = [_to_where_operand(f) for f in request.filters]
-        where = operands[0] if len(operands) == 1 else {"operator": "And", "operands": operands}
 
     schema_headers: Dict[str, str] = {}
     if request.apiKey:
@@ -174,7 +176,8 @@ async def search_objects(request: ClassObjectsSearchRequest) -> Response:
                 selection_parts.append(" ".join(properties))
             selection_body = " ".join(selection_parts)
 
-            where_literal = _build_graphql_where(request.filters or [])
+            logic = _normalize_logic(getattr(request, "logic", "And"))
+            where_literal = _build_graphql_where(request.filters or [], logic)
             limit_value = request.limit or 100
             where_fragment = f", where: {where_literal}" if where_literal else ""
 
