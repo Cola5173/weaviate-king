@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Table, Empty, Tag, Typography, Input, Button, Tooltip, Space, Modal, message, Spin, Select, Collapse } from "antd";
+import { Table, Empty, Tag, Typography, Input, Button, Tooltip, Space, Modal, message, Spin, Select, Collapse, Tree } from "antd";
 import { BACKEND_BASE_URL } from "../config";
 import { ReloadOutlined, CopyOutlined, CheckOutlined, EyeOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import type { DataNode } from "antd/es/tree";
 import "./ObjectsPage.css";
 
 const { Text } = Typography;
@@ -269,6 +270,37 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
     );
   });
 
+  const buildJsonTreeNodes = (value: any, keyLabel: string, path: string): DataNode => {
+    const isObject = value !== null && typeof value === "object";
+
+    if (!isObject) {
+      return {
+        key: path,
+        title: `${keyLabel}: ${String(value)}`,
+        isLeaf: true,
+      };
+    }
+
+    if (Array.isArray(value)) {
+      return {
+        key: path,
+        title: `${keyLabel}: [Array] (${value.length})`,
+        children: value.map((item, index) => buildJsonTreeNodes(item, `[${index}]`, `${path}.${index}`)),
+      };
+    }
+
+    const entries = Object.entries(value as Record<string, any>);
+    return {
+      key: path,
+      title: `${keyLabel}: {Object} (${entries.length} keys)`,
+      children: entries.map(([childKey, childValue]) =>
+        buildJsonTreeNodes(childValue, String(childKey), `${path}.${childKey}`),
+      ),
+    };
+  };
+
+  const jsonTreeData: DataNode[] = objectModalJson ? [buildJsonTreeNodes(objectModalJson, "root", "root")] : [];
+
   const columns: ColumnsType<ObjectData> = [
     {
       title: renderHeader("ID", "对象ID"),
@@ -528,20 +560,12 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
               overflow: "auto",
             }}
           >
-            <pre
-              style={{
-                margin: 0,
-                padding: 0,
-                fontFamily: "Monaco, Menlo, 'Ubuntu Mono', Consolas, 'source-code-pro', monospace",
-                fontSize: 13,
-                lineHeight: 1.6,
-                color: isDark ? "#d4d4d4" : "#333",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-              }}
-            >
-              {JSON.stringify(objectModalJson, null, 2)}
-            </pre>
+            <Tree
+              showLine
+              defaultExpandedKeys={["root"]}
+              selectable={false}
+              treeData={jsonTreeData}
+            />
           </div>
         ) : null}
       </Modal>
