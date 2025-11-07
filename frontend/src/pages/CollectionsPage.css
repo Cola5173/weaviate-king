@@ -11,12 +11,12 @@
 
 /* Dark theme (default) */
 .collections-page.dark {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: #111418;
+  color: #f3f5f7;
 }
 
 .collections-page.dark .collections-header {
-  color: #888;
+  color: #98a2b3;
 }
 
 /* Light theme */
@@ -30,93 +30,151 @@
 }
 
 /* Table styles for dark theme */
-.collections-page.dark :global(.ant-table) {
-  background: #1e1e1e;
-  color: #ffffff;
+.collections-page.dark .ant-table {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f5f7;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
-.collections-page.dark :global(.ant-table-thead > tr > th) {
-  background: #2a2a2a;
-  color: #ffffff;
-  border-bottom: 1px solid #3a3a3a;
+.collections-page.dark .ant-table-container {
+  border-radius: 10px;
 }
 
-.collections-page.dark :global(.ant-table-tbody > tr > td) {
-  background: #1e1e1e;
-  color: #ffffff;
-  border-bottom: 1px solid #3a3a3a;
+.collections-page.dark .ant-table-thead > tr > th {
+  background: rgba(15, 23, 42, 0.55);
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  font-weight: 600;
 }
 
-.collections-page.dark :global(.ant-table-tbody > tr:hover > td) {
-  background: #2a2a2a;
+.collections-page.dark .ant-table-tbody > tr > td {
+  background: rgba(15, 18, 24, 0.65);
+  color: #f8fafc;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  transition: background 0.2s ease;
 }
 
-.collections-page.dark :global(.ant-table-tbody > tr.ant-table-row-selected > td) {
-  background: #2a2a2a;
+.collections-page.dark .ant-table-cell,
+.collections-page.dark .ant-table-column-title {
+  color: #f8fafc;
 }
 
-.collections-page.dark :global(.ant-pagination) {
-  color: #ffffff;
+.collections-page.dark .ant-table-tbody > tr:hover > td {
+  background: rgba(82, 196, 26, 0.12);
 }
 
-.collections-page.dark :global(.ant-pagination-item) {
-  background: #2a2a2a;
-  border-color: #3a3a3a;
+.collections-page.dark .ant-table-tbody > tr.ant-table-row-selected > td {
+  background: rgba(82, 196, 26, 0.18);
 }
 
-.collections-page.dark :global(.ant-pagination-item a) {
-  color: #ffffff;
+.collections-page.dark .ant-pagination {
+  color: #e2e8f0;
 }
 
-.collections-page.dark :global(.ant-pagination-item-active) {
+.collections-page.dark .ant-pagination-item {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+.collections-page.dark .ant-pagination-item a {
+  color: #94a3b8;
+}
+
+.collections-page.dark .ant-pagination-item-active {
   background: #52c41a;
   border-color: #52c41a;
 }
 
-.collections-page.dark :global(.ant-pagination-item-active a) {
-  color: #ffffff;
+.collections-page.dark .ant-pagination-item-active a {
+  color: #111418;
 }
 
-.collections-page.dark :global(.ant-pagination-prev),
-.collections-page.dark :global(.ant-pagination-next) {
-  color: #ffffff;
+.collections-page.dark .ant-pagination-prev,
+.collections-page.dark .ant-pagination-next {
+  color: #94a3b8;
 }
 
-.collections-page.dark :global(.ant-pagination-prev:hover),
-.collections-page.dark :global(.ant-pagination-next:hover) {
+.collections-page.dark .ant-pagination-prev:hover,
+.collections-page.dark .ant-pagination-next:hover {
   color: #52c41a;
 }
 
-.collections-page.dark :global(.ant-pagination-options) {
-  color: #ffffff;
+.collections-page.dark .ant-pagination-options {
+  color: #94a3b8;
 }
 
-.collections-page.dark :global(.ant-select-selector) {
-  background: #2a2a2a;
-  border-color: #3a3a3a;
-  color: #ffffff;
+.collections-page.dark .ant-select-selector {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #e2e8f0;
 }
 
-.collections-page.dark :global(.ant-select-arrow) {
-  color: #ffffff;
+.collections-page.dark .ant-select-arrow {
+  color: #e2e8f0;
+}
+
+
+.collections-page.dark .ant-btn.ant-btn-default {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(148, 163, 184, 0.24);
+  color: #e2e8f0;
+  box-shadow: none;
+}
+
+.collections-page.dark .ant-btn.ant-btn-default:hover,
+.collections-page.dark .ant-btn.ant-btn-default:focus {
+  background: rgba(82, 196, 26, 0.18);
+  border-color: #52c41a;
+  color: #f8fafc;
+}
+
+
+.collections-page.dark .ant-input-affix-wrapper {
+  background: rgba(15, 18, 24, 0.85);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
+  box-shadow: none;
+}
+
+.collections-page.dark .ant-input-affix-wrapper:hover,
+.collections-page.dark .ant-input-affix-wrapper.ant-input-affix-wrapper-focused,
+.collections-page.dark .ant-input-affix-wrapper.ant-input-affix-wrapper-focused:hover,
+.collections-page.dark .ant-input-affix-wrapper:focus-within {
+  border-color: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.16);
+}
+
+.collections-page.dark .ant-input-affix-wrapper .ant-input {
+  background: transparent;
+  color: #f8fafc;
+}
+
+.collections-page.dark .ant-input-affix-wrapper .ant-input::placeholder {
+  color: rgba(148, 163, 184, 0.65);
+}
+
+.collections-page.dark .ant-input-prefix {
+  color: rgba(148, 163, 184, 0.7);
 }
 
 /* Collapse styles for dark theme */
-.collections-page.dark :global(.ant-collapse) {
+.collections-page.dark .ant-collapse {
   background: transparent;
   border: none;
 }
 
-.collections-page.dark :global(.ant-collapse-item) {
+.collections-page.dark .ant-collapse-item {
   border: none;
 }
 
-.collections-page.dark :global(.ant-collapse-header) {
+.collections-page.dark .ant-collapse-header {
   color: #ffffff;
   padding: 4px 0;
 }
 
-.collections-page.dark :global(.ant-collapse-content) {
+.collections-page.dark .ant-collapse-content {
   background: #2a2a2a;
   color: #ffffff;
   border: 1px solid #3a3a3a;
@@ -125,7 +183,7 @@
   padding: 8px;
 }
 
-.collections-page.dark :global(.ant-collapse-content pre) {
+.collections-page.dark .ant-collapse-content pre {
   background: #1e1e1e;
   color: #52c41a;
   padding: 8px;
@@ -134,34 +192,34 @@
 }
 
 /* Table styles for light theme */
-.collections-page.light :global(.ant-table) {
+.collections-page.light .ant-table {
   background: #ffffff;
   color: #1f1f1f;
 }
 
-.collections-page.light :global(.ant-table-thead > tr > th) {
+.collections-page.light .ant-table-thead > tr > th {
   background: #fafafa;
   color: #1f1f1f;
   border-bottom: 1px solid #e8e8e8;
 }
 
-.collections-page.light :global(.ant-table-tbody > tr > td) {
+.collections-page.light .ant-table-tbody > tr > td {
   background: #ffffff;
   color: #1f1f1f;
   border-bottom: 1px solid #e8e8e8;
 }
 
-.collections-page.light :global(.ant-table-tbody > tr:hover > td) {
+.collections-page.light .ant-table-tbody > tr:hover > td {
   background: #f5f5f5;
 }
 
-.collections-page.light :global(.ant-collapse-content) {
+.collections-page.light .ant-collapse-content {
   background: #fafafa;
   color: #1f1f1f;
   border: 1px solid #e8e8e8;
 }
 
-.collections-page.light :global(.ant-collapse-content pre) {
+.collections-page.light .ant-collapse-content pre {
   background: #ffffff;
   color: #1890ff;
   border: 1px solid #e8e8e8;

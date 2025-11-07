@@ -2,10 +2,6 @@ import {
   HomeOutlined,
   AppstoreOutlined,
   BoxPlotOutlined,
-  ThunderboltOutlined,
-  BlockOutlined,
-  EditOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import "./Sidebar.css";
@@ -20,10 +16,6 @@ export default function Sidebar({ activeMenu, onMenuChange }: SidebarProps) {
     { key: "home", icon: <HomeOutlined />, label: "主页", color: "#52c41a" },
     { key: "collections", icon: <AppstoreOutlined />, label: "集合" },
     { key: "objects", icon: <BoxPlotOutlined />, label: "对象" },
-    { key: "brain", icon: <ThunderboltOutlined />, label: "AI", color: "#ff4d9a" },
-    { key: "schema", icon: <BlockOutlined />, label: "Schema" },
-    { key: "query", icon: <EditOutlined />, label: "查询", color: "#52c41a" },
-    { key: "settings", icon: <SettingOutlined />, label: "设置" },
   ];
 
   return (

@@ -11,12 +11,12 @@
 
 /* Dark theme (default) */
 .objects-page.dark {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: #111418;
+  color: #f3f5f7;
 }
 
 .objects-page.dark .objects-header {
-  color: #888;
+  color: #98a2b3;
 }
 
 /* Light theme */
@@ -29,116 +29,137 @@
   color: #666;
 }
 
+/* Shared table styles */
+.objects-page .ant-table {
+  border-radius: 10px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 0 0 1px transparent;
+}
+
+.objects-page .ant-table-container {
+  border-radius: 10px;
+}
+
 /* Table styles for dark theme */
-.objects-page.dark :global(.ant-table) {
-  background: #1e1e1e;
-  color: #ffffff;
+.objects-page.dark .ant-table {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f5f7;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.12);
 }
 
-.objects-page.dark :global(.ant-table-thead > tr > th) {
-  background: #2a2a2a;
-  color: #ffffff;
-  border-bottom: 1px solid #3a3a3a;
+.objects-page.dark .ant-table-thead > tr > th {
+  background: rgba(15, 23, 42, 0.55);
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  font-weight: 600;
 }
 
-.objects-page.dark :global(.ant-table-tbody > tr > td) {
-  background: #1e1e1e;
-  color: #ffffff;
-  border-bottom: 1px solid #3a3a3a;
+.objects-page.dark .ant-table-tbody > tr > td {
+  background: rgba(15, 18, 24, 0.65);
+  color: #f8fafc;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  transition: background 0.2s ease;
 }
 
-.objects-page.dark :global(.ant-table-tbody > tr:hover > td) {
-  background: #2a2a2a;
+.objects-page.dark .ant-table-cell,
+.objects-page.dark .ant-table-column-title {
+  color: #f8fafc;
 }
 
-.objects-page.dark :global(.ant-table-tbody > tr.ant-table-row-selected > td) {
-  background: #2a2a2a;
+.objects-page.dark .ant-table-tbody > tr:hover > td {
+  background: rgba(82, 196, 26, 0.12);
 }
 
-.objects-page.dark :global(.ant-pagination) {
-  color: #ffffff;
+.objects-page.dark .ant-table-tbody > tr.ant-table-row-selected > td {
+  background: rgba(82, 196, 26, 0.18);
 }
 
-.objects-page.dark :global(.ant-pagination-item) {
-  background: #2a2a2a;
-  border-color: #3a3a3a;
+.objects-page.dark .ant-pagination {
+  color: #e2e8f0;
 }
 
-.objects-page.dark :global(.ant-pagination-item a) {
-  color: #ffffff;
+.objects-page.dark .ant-pagination-item {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.12);
 }
 
-.objects-page.dark :global(.ant-pagination-item-active) {
+.objects-page.dark .ant-pagination-item a {
+  color: #94a3b8;
+}
+
+.objects-page.dark .ant-pagination-item-active {
   background: #52c41a;
   border-color: #52c41a;
 }
 
-.objects-page.dark :global(.ant-pagination-item-active a) {
-  color: #ffffff;
+.objects-page.dark .ant-pagination-item-active a {
+  color: #111418;
 }
 
-.objects-page.dark :global(.ant-pagination-prev),
-.objects-page.dark :global(.ant-pagination-next) {
-  color: #ffffff;
+.objects-page.dark .ant-pagination-prev,
+.objects-page.dark .ant-pagination-next {
+  color: #94a3b8;
 }
 
-.objects-page.dark :global(.ant-pagination-prev:hover),
-.objects-page.dark :global(.ant-pagination-next:hover) {
+.objects-page.dark .ant-pagination-prev:hover,
+.objects-page.dark .ant-pagination-next:hover {
   color: #52c41a;
 }
 
-.objects-page.dark :global(.ant-pagination-options) {
-  color: #ffffff;
+.objects-page.dark .ant-pagination-options {
+  color: #94a3b8;
 }
 
-.objects-page.dark :global(.ant-select-selector) {
-  background: #2a2a2a;
-  border-color: #3a3a3a;
-  color: #ffffff;
+.objects-page.dark .ant-select-selector {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #e2e8f0;
 }
 
-.objects-page.dark :global(.ant-select-arrow) {
-  color: #ffffff;
+.objects-page.dark .ant-select-arrow {
+  color: #e2e8f0;
 }
 
 /* Table styles for light theme */
-.objects-page.light :global(.ant-table) {
+.objects-page.light .ant-table {
   background: #ffffff;
   color: #1f1f1f;
+  box-shadow: 0 0 0 1px rgba(229, 231, 235, 1);
 }
 
-.objects-page.light :global(.ant-table-thead > tr > th) {
+.objects-page.light .ant-table-thead > tr > th {
   background: #fafafa;
   color: #1f1f1f;
   border-bottom: 1px solid #e8e8e8;
 }
 
-.objects-page.light :global(.ant-table-tbody > tr > td) {
+.objects-page.light .ant-table-tbody > tr > td {
   background: #ffffff;
   color: #1f1f1f;
   border-bottom: 1px solid #e8e8e8;
 }
 
-.objects-page.light :global(.ant-table-tbody > tr:hover > td) {
+.objects-page.light .ant-table-tbody > tr:hover > td {
   background: #f5f5f5;
 }
 
 /* Collapse styles for dark theme */
-.objects-page.dark :global(.ant-collapse) {
+.objects-page.dark .ant-collapse {
   background: transparent;
   border: none;
 }
 
-.objects-page.dark :global(.ant-collapse-item) {
+.objects-page.dark .ant-collapse-item {
   border: none;
 }
 
-.objects-page.dark :global(.ant-collapse-header) {
+.objects-page.dark .ant-collapse-header {
   color: #ffffff;
   padding: 4px 0;
 }
 
-.objects-page.dark :global(.ant-collapse-content) {
+.objects-page.dark .ant-collapse-content {
   background: #2a2a2a;
   color: #ffffff;
   border: 1px solid #3a3a3a;
@@ -147,7 +168,7 @@
   padding: 8px;
 }
 
-.objects-page.dark :global(.ant-collapse-content pre) {
+.objects-page.dark .ant-collapse-content pre {
   background: #1e1e1e;
   color: #52c41a;
   padding: 8px;
@@ -155,13 +176,13 @@
   border: 1px solid #3a3a3a;
 }
 
-.objects-page.light :global(.ant-collapse-content) {
+.objects-page.light .ant-collapse-content {
   background: #fafafa;
   color: #1f1f1f;
   border: 1px solid #e8e8e8;
 }
 
-.objects-page.light :global(.ant-collapse-content pre) {
+.objects-page.light .ant-collapse-content pre {
   background: #ffffff;
   color: #1890ff;
   border: 1px solid #e8e8e8;

@@ -52,6 +52,9 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
   const lastFetchKeyRef = useRef<string | null>(null);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
+  const propertyNameColor = isDark ? "#f8fafc" : undefined;
+  const propertyValueColor = isDark ? "#d4defa" : "rgba(0, 0, 0, 0.65)";
+
   useEffect(() => {
     const checkTheme = () => {
       setIsDark(document.body.getAttribute("data-theme") !== "light");
@@ -356,11 +359,11 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
       align: "center",
       render: (properties: any) => {
         if (!properties || typeof properties !== "object") {
-          return <Text type="secondary">无属性</Text>;
+          return <Text style={{ color: propertyValueColor }}>无属性</Text>;
         }
         const keys = Object.keys(properties);
         if (keys.length === 0) {
-          return <Text type="secondary">无属性</Text>;
+          return <Text style={{ color: propertyValueColor }}>无属性</Text>;
         }
         return (
           <Collapse
@@ -377,8 +380,8 @@ export default function ObjectsPage({ connection, className, onRefresh }: Object
                       const valueStr = typeof value === "object" ? JSON.stringify(value) : String(value);
                       return (
                         <div key={idx} style={{ marginBottom: 8, fontSize: 11 }}>
-                          <Text strong>{key}</Text>
-                          <Text type="secondary" style={{ marginLeft: 8 }}>
+                          <Text strong style={propertyNameColor ? { color: propertyNameColor } : undefined}>{key}</Text>
+                          <Text style={{ marginLeft: 8, color: propertyValueColor }}>
                             : {valueStr.length > 50 ? `${valueStr.slice(0, 50)}...` : valueStr}
                           </Text>
                         </div>

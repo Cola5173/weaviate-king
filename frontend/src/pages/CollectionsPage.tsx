@@ -43,6 +43,10 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
 
   const classes = Array.isArray(schema?.classes) ? schema.classes : [];
 
+  const propertyNameColor = isDark ? "#f8fafc" : undefined;
+  const propertyValueColor = isDark ? "#d4defa" : "rgba(0, 0, 0, 0.65)";
+  const propertyDescColor = isDark ? "#9ca3af" : "#888";
+
   const renderHeader = (en: string, zh: string) => (
     <div style={{ textAlign: "center" }}>
       <div>{en}</div>
@@ -214,12 +218,12 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
                 <div style={{ maxHeight: 300, overflow: "auto" }}>
                   {properties.map((p: any, idx: number) => (
                     <div key={idx} style={{ marginBottom: 8, fontSize: 11 }}>
-                      <Text strong>{p.name}</Text>
-                      <Text type="secondary" style={{ marginLeft: 8 }}>
+                      <Text strong style={propertyNameColor ? { color: propertyNameColor } : undefined}>{p.name}</Text>
+                      <Text style={{ marginLeft: 8, color: propertyValueColor }}>
                         : {(p.dataType || []).join(", ")}
                       </Text>
                       {p.description && (
-                        <div style={{ fontSize: 10, color: "#888", marginTop: 2 }}>
+                        <div style={{ fontSize: 10, color: propertyDescColor, marginTop: 2 }}>
                           {p.description}
                         </div>
                       )}
