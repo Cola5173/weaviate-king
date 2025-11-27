@@ -30,7 +30,7 @@ body[data-theme='light'] .sidebar-item:hover {
   border-radius: 6px;
   cursor: pointer;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 1.3rem;
   transition: all 0.2s;
 }
 
@@ -45,5 +45,23 @@ body[data-theme='light'] .sidebar-item:hover {
 
 .sidebar-item.active:hover {
   background: #73d13d;
+}
+
+.sidebar-info-button {
+  margin-top: auto;
+  font-size: 1.4rem;
+  color: #8c8c8c;
+}
+
+.sidebar-info-button:hover {
+  color: #ffffff;
+}
+
+body[data-theme='light'] .sidebar-info-button {
+  color: #8c8c8c;
+}
+
+body[data-theme='light'] .sidebar-info-button:hover {
+  color: #1f1f1f;
 }
 

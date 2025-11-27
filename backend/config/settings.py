@@ -17,12 +17,12 @@ SERVER_CONFIG = {
 }
 
 # CORS 配置
+# 注意：
+# - 在 Tauri WebView 中，Origin 可能是 `tauri://localhost`、`null` 等非标准 HTTP/HTTPS 源，
+#   同时前端并未使用 Cookie 等凭证，所以这里直接放宽为「任意来源」即可，避免 dev/build 不一致。
 CORS_CONFIG = {
-    "allow_origins": [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    "allow_credentials": True,
+    "allow_origins": ["*"],      # 允许任意 origin 访问
+    "allow_credentials": False,  # 不使用 Cookie/认证头的跨站凭证
     "allow_methods": ["*"],
     "allow_headers": ["*"],
 }

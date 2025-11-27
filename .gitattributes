@@ -1,0 +1,8 @@
+# Ensure shell scripts are executable
+*.sh text eol=lf
+backend/start-backend.sh text eol=lf
+
+# Ensure PowerShell scripts have correct line endings
+*.ps1 text eol=crlf
+backend/start-backend.ps1 text eol=crlf
+

@@ -90,7 +90,6 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
       title: renderHeader("className", "类名"),
       dataIndex: "className",
       key: "className",
-      width: 400,
       align: "center",
       ellipsis: false,
       render: (text: string) => {
@@ -185,7 +184,6 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
       title: renderHeader("vectorIndexType", "向量索引类型"),
       dataIndex: "vectorIndexType",
       key: "vectorIndexType",
-      width: 180,
       align: "center",
       render: (text: string | undefined) =>
         text ? <Tag color={isDark ? "geekblue" : "blue"}>{text}</Tag> : "-",
@@ -194,7 +192,6 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
       title: renderHeader("vectorizer", "向量化器"),
       dataIndex: "vectorizer",
       key: "vectorizer",
-      width: 220,
       align: "center",
       render: (text: string | undefined) =>
         text ? <Tag color={isDark ? "purple" : "magenta"}>{text}</Tag> : "-",
@@ -204,7 +201,6 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
       title: renderHeader("properties", "属性"),
       dataIndex: "properties",
       key: "properties",
-      width: 200,
       align: "center",
       render: (properties: any[]) => (
         <Collapse
@@ -286,7 +282,8 @@ export default function CollectionsPage({ connection, schema, onRefresh }: Colle
               showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
             }}
-            scroll={{ x: "max-content" }}
+            scroll={{ x: true }}
+            tableLayout="fixed"
             size="middle"
           />
         </>

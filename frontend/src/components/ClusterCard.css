@@ -19,7 +19,7 @@
 }
 
 .cluster-card-title {
-  font-size: 16px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #ffffff;
 }
@@ -34,7 +34,7 @@
   border: none;
   padding: 0;
   height: auto;
-  font-size: 12px;
+  font-size: 0.85rem;
 }
 
 .cluster-card-btn:hover {
@@ -52,7 +52,7 @@
 }
 
 .cluster-card-address {
-  font-size: 13px;
+  font-size: 0.9rem;
   color: #999999;
   line-height: 1.5;
 }

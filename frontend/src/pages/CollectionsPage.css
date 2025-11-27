@@ -6,7 +6,15 @@
 .collections-header {
   margin-bottom: 16px;
   padding: 8px 0;
-  font-size: 14px;
+  font-size: 1rem;
+}
+
+/* 放大表格中文字的字号，提升可读性 */
+.collections-page .ant-table,
+.collections-page .ant-table-cell,
+.collections-page .ant-table-thead > tr > th,
+.collections-page .ant-table-tbody > tr > td {
+  font-size: 15px;
 }
 
 /* Dark theme (default) */

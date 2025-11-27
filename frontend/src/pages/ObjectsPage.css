@@ -6,7 +6,15 @@
 .objects-header {
   margin-bottom: 16px;
   padding: 8px 0;
-  font-size: 14px;
+  font-size: 1rem;
+}
+
+/* 放大对象表格中文字的字号 */
+.objects-page .ant-table,
+.objects-page .ant-table-cell,
+.objects-page .ant-table-thead > tr > th,
+.objects-page .ant-table-tbody > tr > td {
+  font-size: 15px;
 }
 
 /* Dark theme (default) */

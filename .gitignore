@@ -9,6 +9,9 @@ node_modules/
 .npm/
 .pnpm-store/
 
+# Python virtual env for Tauri packaging
+backend/.venv-tauri/
+
 # Logs
 logs/
 *.log
@@ -48,5 +51,4 @@ storybook-static/
 # Misc
 serverless/
 *.local
-
 

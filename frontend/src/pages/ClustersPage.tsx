@@ -5,6 +5,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import ClusterCard from "../components/ClusterCard";
 import AddClusterModal from "../components/AddClusterModal";
 import { BACKEND_BASE_URL } from "../config";
+import { httpRequest } from "../utils/http";
 import "./ClustersPage.css";
 
 export interface Cluster {
@@ -24,7 +25,7 @@ export default function ClustersPage() {
 
   const loadClusters = async () => {
     try {
-      const resp = await fetch(`${BACKEND_BASE_URL}/connection/list`);
+      const resp = await httpRequest(`${BACKEND_BASE_URL}/connection/list`);
       if (!resp.ok) {
         throw new Error(`HTTP ${resp.status}`);
       }
@@ -39,7 +40,10 @@ export default function ClustersPage() {
       }));
       setClusters(mapped);
     } catch (e) {
-      message.error("加载集群列表失败");
+      // eslint-disable-next-line no-console
+      console.error("加载集群列表失败:", e);
+      const msg = (e as any)?.message || String(e);
+      message.error(`加载集群列表失败: ${msg} (url=${BACKEND_BASE_URL}/connection/list)`);
     }
   };
 
@@ -55,7 +59,7 @@ export default function ClustersPage() {
 
   const handleEdit = async (cluster: Cluster) => {
     try {
-      const resp = await fetch(`${BACKEND_BASE_URL}/connection/get/${encodeURIComponent(cluster.id)}`);
+      const resp = await httpRequest(`${BACKEND_BASE_URL}/connection/get/${encodeURIComponent(cluster.id)}`);
       const result = await resp.json();
       if (!resp.ok || !result?.success) {
         throw new Error(result?.message || `HTTP ${resp.status}`);
@@ -77,7 +81,7 @@ export default function ClustersPage() {
 
   const handleDelete = async (clusterId: string) => {
     try {
-      const resp = await fetch(`${BACKEND_BASE_URL}/connection/delete/${encodeURIComponent(clusterId)}`, {
+      const resp = await httpRequest(`${BACKEND_BASE_URL}/connection/delete/${encodeURIComponent(clusterId)}`, {
         method: "DELETE",
       });
       const result = await resp.json();
@@ -101,7 +105,7 @@ export default function ClustersPage() {
         address: cluster.address,
         apiKey: cluster.apiKey || "",
       };
-      const resp = await fetch(`${BACKEND_BASE_URL}/schema/query`, {
+      const resp = await httpRequest(`${BACKEND_BASE_URL}/schema/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -1,9 +1,11 @@
+import { useState } from "react";
 import {
   HomeOutlined,
   AppstoreOutlined,
   BoxPlotOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
-import { Tooltip } from "antd";
+import { Modal, Tooltip } from "antd";
 import "./Sidebar.css";
 
 interface SidebarProps {
@@ -12,6 +14,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeMenu, onMenuChange }: SidebarProps) {
+  const [isInfoVisible, setInfoVisible] = useState(false);
   const menuItems = [
     { key: "home", icon: <HomeOutlined />, label: "主页", color: "#52c41a" },
     { key: "collections", icon: <AppstoreOutlined />, label: "集合" },
@@ -54,6 +57,34 @@ export default function Sidebar({ activeMenu, onMenuChange }: SidebarProps) {
           </Tooltip>
         );
       })}
+      <Tooltip
+        title="关于应用"
+        placement="right"
+        overlayInnerStyle={{
+          backgroundColor: "#2a2a2a",
+          color: "#ffffff",
+          border: "1px solid #3a3a3a",
+        }}
+      >
+        <div
+          className="sidebar-item sidebar-info-button"
+          onClick={() => setInfoVisible(true)}
+        >
+          <InfoCircleOutlined />
+        </div>
+      </Tooltip>
+      <Modal
+        title="关于 Weaviate King"
+        open={isInfoVisible}
+        onOk={() => setInfoVisible(false)}
+        onCancel={() => setInfoVisible(false)}
+        footer={null}
+      >
+        <div className="sidebar-info-modal">
+          <p>Weaviate King 是一个帮助你管理 Weaviate 集群、集合与对象的桌面工具。</p>
+          <p>通过连接管理器快速切换，维护自己的数据集，轻松完成日常运维。</p>
+        </div>
+      </Modal>
     </div>
   );
 }

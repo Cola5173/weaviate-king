@@ -4,6 +4,18 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+html {
+  /* 基础字号随屏幕宽度自适应：小屏不小于 13px，大屏不超过 16px */
+  font-size: clamp(13px, 0.9vw + 10px, 16px);
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -21,8 +33,6 @@ body[data-theme='light'] {
 }
 
 #root {
-  width: 100%;
-  height: 100vh;
   overflow: hidden;
 }
 
